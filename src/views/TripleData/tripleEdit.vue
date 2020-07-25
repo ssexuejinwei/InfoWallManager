@@ -139,6 +139,7 @@ export default {
   },
   data () {
     return {
+			cur_page:1,
       isChoose:false,
       api:'/api/community/manage/service_group/',
       defaulttriple:{},

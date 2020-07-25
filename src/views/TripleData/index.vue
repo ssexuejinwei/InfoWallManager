@@ -35,6 +35,7 @@
           </div>
            <br/>
           <el-table
+            v-loading="loading"
             :data="tripleTableData"
             @selection-change="handleSelect"
             highlight-current-row
@@ -74,22 +75,85 @@
           </el-table>
         </el-main>
         <el-footer>
-          <el-row style="margin-top:1.5rem; ">
-            <el-col :span="3">
-              <el-button @click='isAdd = true'>添加</el-button>
-            </el-col>
-            <el-col :span="5">
+          <div style="text-align: right;">
+            <el-pagination
+              layout="prev, pager, next"
+              :total="total"
+              :current-page.sync="cur_page"
+            />
+          </div>
+              <el-button @click='isAdd = true'>添加</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
               <el-button @click="deletetriples">
                 删除
               </el-button>
-            </el-col>
-          </el-row>
         </el-footer>
       </el-container>
-      <el-dialog
-        title="三元组信息"
-        :visible.sync="isAdd "
-      >
+      <el-dialog title="三元组信息" :visible.sync="isAdd ">
+        <!-- 待添加节点 -->
+        <el-dialog title="节点" :visible.sync="isChoose" append-to-body>
+          <el-table
+            :data="nodeTableData"
+            highlight-current-row
+            :border="true"
+          >
+          <el-table-column
+            type="selection"
+          />
+          <el-table-column
+            prop="name"
+            label="节点名"
+            align="center"
+          />
+          <el-table-column
+            label="是否热点"
+            align="center"
+          >
+            <template slot-scope="scope">
+              <span v-if="scope.row.isHot==0">否</span>
+              <span v-if="scope.row.isHot==1">是</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="是否重要"
+            align="center"
+          >
+          <template slot-scope="scope">
+              <span v-if="scope.row.isVital==0">否</span>
+              <span v-if="scope.row.isVital==1">是</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="word"
+            label="文字详情"
+            align="center"
+          />
+          <el-table-column
+            label="操作"
+            align="center"
+          >
+            <template slot-scope="scope">
+              <el-button
+                size="medium"
+                :disabled="nodeTableData[scope.$index].disable"
+                @click="handleChoose(scope.$index,scope.row)"
+              >
+                选择
+              </el-button>
+            </template>
+          </el-table-column>
+          </el-table>
+          <div style="text-align: right;">
+            <el-pagination
+              layout="prev, pager, next"
+              :total="total"
+              :current-page.sync="cur_page"
+            />
+          </div>
+          <span slot="footer" class="dialog-footer">
+              <el-button @click="isChoose = false">取 消</el-button>
+              <el-button type="primary" @click="isChoose=false">确 定</el-button>
+          </span>
+        </el-dialog>
         <el-form
           :model="tripleForm"
           label-width="100px"
@@ -98,10 +162,16 @@
           <el-form-item
             label="节点"
           >
-            <el-input
-              v-model="tripleForm.nodeL"
-              autocomplete="off"
-            />
+          <el-select v-model="tripleForm.nodeL" placeholder="请选择">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+          </el-select>
+          &nbsp;&nbsp;&nbsp;
+            <el-button type="primary" @click="isChoose=true">选择候选节点</el-button>
           </el-form-item>
           <el-form-item
             label="关系"
@@ -114,10 +184,19 @@
           <el-form-item
             label="节点"
           >
-          <el-input
-            v-model="tripleForm.nodeR"
-            autocomplete="off"
-          />
+          <el-select v-model="tripleForm.nodeR" placeholder="请选择">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+          </el-select>
+          </el-form-item>
+          <el-form-item size="large">
+            <el-button @click="save" type="success">
+              保存
+            </el-button>
           </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -143,14 +222,18 @@ export default {
   },
   data () {
     return {
+      loading:true,
       search:{
         value:'',
         key:''
       },
+      cur_page:1,
+      total:2,
       api:'/api/community/manage/service_group/',
       imageUrl:'',
       selectedtriples:[],
       triple:{},
+      isChoose:false,
       isEdit: false,
       isAdd: false,
       tripleTableData:[],
@@ -160,7 +243,26 @@ export default {
         tel:'',
         IDNumber:'',
         grid:''
-      }
+      },
+      nodeTableData : [
+      	{
+         id:1,
+      	 name:'李黎',
+         isHot:0,
+         isVital:1,
+         word:'-',
+         pic:''
+      	},
+      	{
+          id:2,
+          name:'十佳歌手大赛',
+          isHot:1,
+          isVital:1,
+          word:'十佳歌手大赛举办于xx年xx月，xxx出席......',
+          pic:''
+      	}
+      ],
+      options:[]
     }
   },
   watch: {
@@ -178,9 +280,17 @@ export default {
     	  nodeR:'汉'
     	}
     ]
+    this.loading = false
     // this.getData()
   },
   methods: {
+    handleChoose(index,row) {
+      this.options.push({
+        value:this.nodeTableData[index].name,
+        label:this.nodeTableData[index].name
+      })
+      this.nodeTableData[index].disable = true
+    },
     handleSearch () {
       // this.isLoading = true
     },

@@ -43,6 +43,7 @@
          </div>
           <br/>
           <el-table
+            v-loading="loading"
             :data="nodeInfoTableData"
             @selection-change="handleSelect"
             highlight-current-row
@@ -95,22 +96,21 @@
           </el-table>
         </el-main>
         <el-footer>
-          <el-row style="margin-top:1.5rem; ">
-            <el-col :span="3">
+          <div style="text-align: right;">
+            <el-pagination
+              layout="prev, pager, next"
+              :total="total"
+              :current-page.sync="cur_page"
+            />
+          </div>
               <el-button @click='isAdd = true'>添加</el-button>
-            </el-col>
-            <el-col :span="5">
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <el-button @click="deletenodeInfos">
                 删除
               </el-button>
-            </el-col>
-          </el-row>
         </el-footer>
       </el-container>
-      <el-dialog
-        title="节点详情信息"
-        :visible.sync="isAdd "
-      >
+      <el-dialog title="节点详情信息" :visible.sync="isAdd ">
         <el-form
           :model="nodeInfoForm"
           label-width="100px"
@@ -189,6 +189,8 @@ export default {
         value:'',
         key:''
       },
+      cur_page:1,
+      total:2,
       api:'/api/community/manage/service_group/',
       imageUrl:'',
       selectednodeInfos:[],
@@ -204,7 +206,8 @@ export default {
         grid:''
       },
       fileList:[],
-      images:{}
+      images:{},
+      loading:true,
     }
   },
   watch: {
@@ -226,6 +229,7 @@ export default {
         pic:''
     	}
     ]
+    this.loading=false
     // this.getData()
   },
   methods: {
@@ -289,7 +293,7 @@ export default {
       return this.$axios.delete(this.api, {data:qs.stringify(data)})
     },
     deletenodeInfos () {
-      this.$confirm('是否删除选中的节点详情', '提示', { type: 'warning' }).then(() => {
+      this.$confirm('是否删除选中的节点', '提示', { type: 'warning' }).then(() => {
         Promise.all(this.selectednodeInfos.map(this.deletenodeInfo))
           .then(() => this.$alert('删除成功', '成功', { type: 'success' }).then(()=>{
             this.getData()
