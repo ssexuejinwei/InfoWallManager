@@ -1,14 +1,14 @@
 module.exports = {
   devServer: {
-    proxy: {
-      '/api': {
-        target: 'http://47.101.181.233:8000',
-        changeOrigin: true,
-        pathRewrite: {
-          '^/api': ''
-        }
-      }
-    },
+    // proxy: {
+    //   '/api': {
+    //     target: 'http://112.126.66.14:5000/api',
+    //     changeOrigin: true,
+    //     pathRewrite: {
+    //       '^/api': ''
+    //     }
+    //   }
+    // },
     overlay: {
       warnings: false,
       errors: false

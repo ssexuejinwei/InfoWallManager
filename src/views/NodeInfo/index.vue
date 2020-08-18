@@ -5,11 +5,7 @@
       <el-container>
         <el-main>
          <div class = 'search'>
-           <el-input
-             v-model="search.value"
-             placeholder="请输入内容"
-             style="width: 500px;text-align:center;"
-           >
+         <el-input v-model="search.value" placeholder="请输入内容" style="width: 500px;text-align:center;">
            <el-select
              slot="prepend"
              v-model="search.key"
@@ -22,11 +18,11 @@
              />
              <el-option
                label="是否热点"
-               value="isHot"
+               value="is_hot"
              />
              <el-option
-               label="是否重要"
-               value="isVital"
+               label="重要程度"
+               value="importance"
              />
              <el-option
                label="文字详情"
@@ -62,22 +58,13 @@
               align="center"
             >
               <template slot-scope="scope">
-                <span v-if="scope.row.isHot==0">否</span>
-                <span v-if="scope.row.isHot==1">是</span>
+                <span v-if="scope.row.is_hot=='false'">否</span>
+                <span v-if="scope.row.is_hot=='true'">是</span>
               </template>
             </el-table-column>
             <el-table-column
-              label="是否重要"
-              align="center"
-            >
-            <template slot-scope="scope">
-                <span v-if="scope.row.isVital==0">否</span>
-                <span v-if="scope.row.isVital==1">是</span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="word"
-              label="文字详情"
+              prop="importance"
+              label="重要等级"
               align="center"
             />
             <el-table-column
@@ -89,7 +76,7 @@
                   size="medium"
                   @click="handleEdit(scope.$index,scope.row)"
                 >
-                  编辑
+                  详情
                 </el-button>
               </template>
             </el-table-column>
@@ -127,38 +114,48 @@
           <el-form-item
             label="是否热点"
           >
-            <el-radio-group v-model="nodeInfoForm.isHot">
-                <el-radio :label="0">否</el-radio>
-                <el-radio :label="1">是</el-radio>
+            <el-radio-group v-model="nodeInfoForm.is_hot">
+                <el-radio :label="'false'">否</el-radio>
+                <el-radio :label="'true'">是</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item
-            label="是否重要"
+            label="重要程度"
           >
-            <el-radio-group v-model="nodeInfoForm.isVital">
-                <el-radio :label="0">否</el-radio>
-                <el-radio :label="1">是</el-radio>
+            <el-radio-group v-model="nodeInfoForm.importance">
+                <el-radio :label="'1'">1</el-radio>
+                <el-radio :label="'2'">2</el-radio>
+                <el-radio :label="'3'">3</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item
-            label="文字详情"
+            label="详情标题"
           >
           <el-input
-            v-model="nodeInfoForm.word"
+            v-model="nodeInfoForm.ext.title"
+            autocomplete="off"
+          />
+          </el-form-item>
+          <el-form-item
+            label="详细信息"
+          >
+          <el-input
+            v-model="nodeInfoForm.ext.content"
             autocomplete="off"
           />
           </el-form-item>
           <el-form-item label="上传图片">
             <el-upload
+              class="avatar-uploader"
               action="#"
               ref="upload"
-              list-type="picture-card"
+              list-type="picture"
               :file-list="fileList"
-              :on-remove="handleRemove"
               :on-change="handleChange"
               :auto-upload="false"
               >
-               <i class="el-icon-plus"></i>
+              <img v-for="value in fileList" :src="value" class="avatar"/>
+               <i v-if="fileList.length==0" class="el-icon-plus"></i>
             </el-upload>
           </el-form-item>
         </el-form>
@@ -191,75 +188,79 @@ export default {
       },
       cur_page:1,
       total:2,
-      api:'/api/community/manage/service_group/',
+      api:'/api/node',
+      apiGetAll:'/api/nodes',
       imageUrl:'',
       selectednodeInfos:[],
       nodeInfo:{},
       isEdit: false,
       isAdd: false,
       nodeInfoTableData:[],
-      nodeInfoForm:{
-        name:'',
-        sex:'',
-        tel:'',
-        IDNumber:'',
-        grid:''
-      },
+      nodeInfoForm:{ext:{
+        title:'',
+        content:'',
+        bin_img:[]
+      }},
       fileList:[],
-      images:{},
+      images:[],
       loading:true,
     }
   },
   watch: {
+    cur_page(newValue,oldValue) {
+      this.getData()
+    }
   },
   created () {
-    this.nodeInfoTableData = [
-    	{
-    	 name:'李黎',
-       isHot:0,
-       isVital:1,
-       word:'-',
-       pic:''
-    	},
-    	{
-        name:'十佳歌手大赛',
-        isHot:1,
-        isVital:1,
-        word:'十佳歌手大赛举办于xx年xx月，xxx出席......',
-        pic:''
-    	}
-    ]
-    this.loading=false
-    // this.getData()
+    this.getData()
   },
   methods: {
     handleSearch () {
-      // this.isLoading = true
     },
     handleChange(file, fileList) {
-      // this.images = fileList
-      // console.log(this.images)
       this.images.push(file)
     },
     handleRemove(file, fileList) {
+      this.images.forEach((value,index) =>{
+          if(file.uid == value.uid){
+            this.images.splice(index,1)
+            this.$alert('删除成功', '成功')
+          } 
+      })
       this.$alert('删除成功', '成功')
     },
 		getData () {
-		  Axios.get(this.api).then(response => {
-		    this.nodeInfoTableData = response.data.data
-		  }).catch(e => {
-		    console.error(e)
-		    this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
-		    this.nodeInfoTableData = []
-		  }).finally(() => { this.loading = false })
+      // console.log(this.$axios.default.baseURL+this.api)
+      Axios.get(this.apiGetAll,{
+        params:{
+          size:10,
+          page:this.cur_page
+        }
+      }).then(response => {
+        this.nodeInfoTableData  = []
+        this.total = response.data.count
+        response.data.results[0].data.forEach((value) => {
+          this.nodeInfoTableData.push({
+            id: value.meta[0].id,
+            name:value.row[0].name,
+            ext:value.row[0].ext,
+            importance:value.row[0].importance,
+            is_hot:value.row[0].is_hot
+          })
+        })
+      }).catch(e => {
+        console.error(e)
+        this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
+        this.nodeInfoTableData = []
+      }).finally(() => { this.loading = false })
 		},
     handleEditFinish (val) {
-      this.isEdit = false
-      // if (val) {
-      //   //获取新数据
-      //   this.getData()
-      //   this.isEdit = false
-      // }
+      // this.isEdit = false
+      if (val) {
+        //获取新数据
+        this.getData()
+        this.isEdit = false
+      }
     },
     backHome (val) {
       this.isEdit = val
@@ -268,29 +269,51 @@ export default {
     handleEdit(index,row) {
       this.isEdit = true
       this.nodeInfo = this.nodeInfoTableData[index]
-      console.log(index,row)
+      // console.log(index,row)
     },
     addnodeInfo() {
-      this.isAdd = false
-      this.nodeInfoTableData.push(this.nodeInfoForm)
-      // console.log(this.nodeInfoForm)
-      // Axios.post(this.api, qs.stringify(this.nodeInfoForm))
-      //   .then(() => {
-      //     this.$alert('添加成功', '成功').then(() => {
-      //       this.getData()
-      //       this.isAdd = false
-      //     })
-      //   }).catch(e => {
-      //     console.error(e)
-      //     this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
-      //   })
+      if(this.images.length === 0) {
+        Axios.post(this.api, this.nodeInfoForm)
+          .then(() => {
+            this.$alert('添加成功', '成功').then(() => {
+              this.getData()
+              this.isAdd = false
+            })
+          }).catch(e => {
+            console.error(e)
+            this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
+          })
+      } else {
+        let reader =new FileReader();//创建读取文件的方法
+        // var img1=event.target.files[0];
+        let count = 0
+        reader.readAsDataURL(this.images[count].raw);//将文件已url的形式读入页面
+        let that=this;
+        reader.onload=function(e){ 
+          that.nodeInfoForm.ext.bin_img.push(e.target.result)
+          count ++
+          if (count < that.images.length) {
+            reader.readAsDataURL(that.images[count].raw)
+          } else {
+            Axios.post(that.api, that.nodeInfoForm)
+              .then(() => {
+                that.$alert('添加成功', '成功').then(() => {
+                  that.getData()
+                  that.isAdd = false
+                })
+              }).catch(e => {
+                console.error(e)
+                that.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
+              })
+            }
+          }
+        }
     },
     deletenodeInfo (nodeInfo) {
-      console.log('nodeInfo', nodeInfo)
       const data = {
         id: nodeInfo.id
       }
-      return this.$axios.delete(this.api, {data:qs.stringify(data)})
+      return this.$axios.delete(this.api, {data:data})
     },
     deletenodeInfos () {
       this.$confirm('是否删除选中的节点', '提示', { type: 'warning' }).then(() => {

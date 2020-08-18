@@ -3,7 +3,7 @@ import axios from 'axios'
 // import { responseCodeMap } from './constant'
 
 axios.defaults.baseURL = 'http://47.101.181.233:8000'
-axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+// axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 
 // axios.interceptors.request.use(config => {
 //   const token = localStorage.getItem('nike#token')

@@ -19,8 +19,8 @@ if (process.env.NODE_ENV === 'production') {
 }
 Vue.prototype.$cookies = VueCookies
 Vue.prototype.$axios = axios
-// axios.defaults.baseURL = 'http://47.101.181.233:8000'
-axios.defaults.baseURL = ''
+axios.defaults.baseURL = 'http://112.126.66.14:5000'
+// axios.defaults.baseURL = ''
 // axios 拦截器
 
 Vue.config.productionTip = false

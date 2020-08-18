@@ -45,20 +45,54 @@
               type="selection"
             />
             <el-table-column
-              prop="nodeL"
-              label="节点"
+              prop="source"
+              label="源节点ID"
               align="center"
             />
             <el-table-column
-              prop="relation"
+              label="节点名"
+              align="center"
+            >
+              <template slot-scope="scope">
+                {{scope.row.source_node.name}}
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="是否热点"
+              align="center"
+            >
+              <template slot-scope="scope">
+                <span v-if="scope.row.source_node.is_hot=='false'">否</span>
+                <span v-if="scope.row.source_node.is_hot=='true'">是</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="label"
               label="关系"
               align="center"
             />
             <el-table-column
-              prop="nodeR"
-              label="节点"
+              prop="target"
+              label="尾节点ID"
               align="center"
             />
+            <el-table-column
+              label="节点名"
+              align="center"
+            >
+              <template slot-scope="scope">
+                {{scope.row.target_node.name}}
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="是否热点"
+              align="center"
+            >
+              <template slot-scope="scope">
+                <span v-if="scope.row.target_node.is_hot=='false'">否</span>
+                <span v-if="scope.row.target_node.is_hot=='true'">是</span>
+              </template>
+            </el-table-column>
             <el-table-column
               label="操作"
               align="center"
@@ -97,9 +131,6 @@
             :border="true"
           >
           <el-table-column
-            type="selection"
-          />
-          <el-table-column
             prop="name"
             label="节点名"
             align="center"
@@ -109,25 +140,16 @@
             align="center"
           >
             <template slot-scope="scope">
-              <span v-if="scope.row.isHot==0">否</span>
-              <span v-if="scope.row.isHot==1">是</span>
+              <span v-if="scope.row.is_hot=='false'">否</span>
+              <span v-if="scope.row.is_hot=='true'">是</span>
             </template>
           </el-table-column>
           <el-table-column
-            label="是否重要"
-            align="center"
-          >
-          <template slot-scope="scope">
-              <span v-if="scope.row.isVital==0">否</span>
-              <span v-if="scope.row.isVital==1">是</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="word"
-            label="文字详情"
+            prop="importance"
+            label="重要等级"
             align="center"
           />
-          <el-table-column
+         <el-table-column
             label="操作"
             align="center"
           >
@@ -140,13 +162,13 @@
                 选择
               </el-button>
             </template>
-          </el-table-column>
+          </el-table-column> -->
           </el-table>
           <div style="text-align: right;">
             <el-pagination
               layout="prev, pager, next"
-              :total="total"
-              :current-page.sync="cur_page"
+              :total="total_add"
+              :current-page.sync="cur_page_add"
             />
           </div>
           <span slot="footer" class="dialog-footer">
@@ -160,9 +182,9 @@
           style="width:31.25rem;"
         >
           <el-form-item
-            label="节点"
+            label="源节点"
           >
-          <el-select v-model="tripleForm.nodeL" placeholder="请选择">
+          <el-select v-model="tripleForm.source" placeholder="请选择">
               <el-option
                 v-for="item in options"
                 :key="item.value"
@@ -177,14 +199,14 @@
             label="关系"
           >
           <el-input
-            v-model="tripleForm.relation"
+            v-model="tripleForm.label"
             autocomplete="off"
           />
           </el-form-item>
           <el-form-item
-            label="节点"
+            label="尾节点"
           >
-          <el-select v-model="tripleForm.nodeR" placeholder="请选择">
+          <el-select v-model="tripleForm.target" placeholder="请选择">
               <el-option
                 v-for="item in options"
                 :key="item.value"
@@ -193,15 +215,15 @@
               </el-option>
           </el-select>
           </el-form-item>
-          <el-form-item size="large">
+          <!-- <el-form-item size="large">
             <el-button @click="save" type="success">
               保存
             </el-button>
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
         <span slot="footer" class="dialog-footer">
             <el-button @click="isAdd = false">取 消</el-button>
-            <el-button type="primary" @click="addtriple">确 定</el-button>
+            <el-button type="primary" @click="addtriple">添 加</el-button>
           </span>
         </el-dialog>
     </div>
@@ -228,8 +250,12 @@ export default {
         key:''
       },
       cur_page:1,
+      cur_page_add:1,
+      total_add:2,
       total:2,
-      api:'/api/community/manage/service_group/',
+      api:'/api/rel',
+      apiGetAll:'/api/rels',
+      apiNodes:'/api/nodes',
       imageUrl:'',
       selectedtriples:[],
       triple:{},
@@ -237,56 +263,27 @@ export default {
       isEdit: false,
       isAdd: false,
       tripleTableData:[],
-      tripleForm:{
-        name:'',
-        sex:'',
-        tel:'',
-        IDNumber:'',
-        grid:''
-      },
-      nodeTableData : [
-      	{
-         id:1,
-      	 name:'李黎',
-         isHot:0,
-         isVital:1,
-         word:'-',
-         pic:''
-      	},
-      	{
-          id:2,
-          name:'十佳歌手大赛',
-          isHot:1,
-          isVital:1,
-          word:'十佳歌手大赛举办于xx年xx月，xxx出席......',
-          pic:''
-      	}
-      ],
+      tripleForm:{},
+      nodeTableData : [],
       options:[]
     }
   },
   watch: {
+    cur_page(newValue,oldValue) {
+      this.getData()
+    },
+    cur_page_add(newValue,oldValue) {
+      this.getNodes()
+    }
   },
   created () {
-    this.tripleTableData = [
-    	{
-    	 nodeL:'李黎',
-    	 relation:'冠军',
-    	 nodeR:'第九届十佳歌手大赛'
-    	},
-    	{
-    	  nodeL:'李黎',
-    	  relation:'民族',
-    	  nodeR:'汉'
-    	}
-    ]
-    this.loading = false
-    // this.getData()
+   this.getData()
+   this.getNodes()
   },
   methods: {
     handleChoose(index,row) {
       this.options.push({
-        value:this.nodeTableData[index].name,
+        value:this.nodeTableData[index].id,
         label:this.nodeTableData[index].name
       })
       this.nodeTableData[index].disable = true
@@ -294,14 +291,44 @@ export default {
     handleSearch () {
       // this.isLoading = true
     },
+    getNodes() {
+      Axios.get(this.apiNodes,{
+        params:{
+          size:10,
+          page:this.cur_page_add
+        }
+      }).then(response => {
+        this.nodeTableData  = []
+        this.total_add = response.data.count
+        response.data.results[0].data.forEach((value) => {
+          this.nodeTableData.push({
+            id: value.meta[0].id,
+            name:value.row[0].name,
+            ext:value.row[0].ext,
+            importance:value.row[0].importance,
+            is_hot:value.row[0].is_hot
+          })
+        })
+      }).catch(e => {
+        console.error(e)
+        this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
+        this.nodeInfoTableData = []
+      }).finally(() => { this.loading = false })
+    },
 		getData () {
-		  Axios.get(this.api).then(response => {
-		    this.tripleTableData = response.data.data
-		  }).catch(e => {
-		    console.error(e)
-		    this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
-		    this.tripleTableData = []
-		  }).finally(() => { this.loading = false })
+      Axios.get(this.apiGetAll,{
+        params:{
+          size:10,
+          page:this.cur_page
+        }
+      }).then(response => {
+        this.total = response.data.count
+        this.tripleTableData  = response.data.results[0].data
+      }).catch(e => {
+        console.error(e)
+        this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
+        this.nodeInfoTableData = []
+      }).finally(() => { this.loading = false })
 		},
     handleEditFinish (val) {
       this.isEdit = false
@@ -318,29 +345,34 @@ export default {
     handleEdit(index,row) {
       this.isEdit = true
       this.triple = this.tripleTableData[index]
-      console.log(index,row)
+      // console.log(index,row)
     },
     addtriple() {
       // console.log(this.tripleForm)
-      this.isAdd = false
-      this.tripleTableData.push(this.tripleForm)
-      // Axios.post(this.api, qs.stringify(this.tripleForm))
-      //   .then(() => {
-      //     this.$alert('添加成功', '成功').then(() => {
-      //       this.getData()
-      //       this.isAdd = false
-      //     })
-      //   }).catch(e => {
-      //     console.error(e)
-      //     this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
-      //   })
+      Axios.post(this.api, this.tripleForm)
+        .then((res) => {
+          if(res.data.errors.length!=0){
+            alert(res.data.errors.message).then(()=>{
+              this.$alert('添加失败')
+            })
+          } else {
+            this.$alert('添加成功', '成功').then(() => {
+              this.getData()
+              this.isAdd = false
+            })
+          }
+        }).catch(e => {
+          console.error(e)
+          this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
+        })
     },
     deletetriple (triple) {
       console.log('triple', triple)
       const data = {
-        id: triple.id
+        source: triple.source,
+        target:triple.target
       }
-      return this.$axios.delete(this.api, {data:qs.stringify(data)})
+      return this.$axios.delete(this.api, {data:data})
     },
     deletetriples () {
       this.$confirm('是否删除选中的三元组', '提示', { type: 'warning' }).then(() => {
