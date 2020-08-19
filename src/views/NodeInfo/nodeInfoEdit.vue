@@ -54,15 +54,15 @@
             </el-form-item>
             <el-form-item label="上传图片">
               <el-upload
-                class="avatar-uploader"
                 action="#"
                 ref="upload"
-                list-type="picture"
+                list-type="picture-card"
+                :file-list="fileList"
+                :on-remove="handleRemove"
                 :on-change="handleChange"
                 :auto-upload="false"
                 >
-                <img v-for="value in fileList" :src="value" class="avatar"/>
-                 <i v-if="fileList.length==0" class="el-icon-plus"></i>
+                 <i class="el-icon-plus"></i>
               </el-upload>
             </el-form-item>
             <el-form-item size="large">
@@ -93,74 +93,115 @@ export default {
   data () {
     return {
       api:'/api/node',
+      api_upload:'/api/photo/upload',
+      api_upload_get:'/api/photo/',
       defaultnodeInfo:{},
       fileList:[],
-      images:[]
+      images:[],
+      is_upload:false,
+      fileNames:[]
     }
   },
   created () {
+    
 		if(typeof(this.nodeInfo.ext)=='string') {
+      // console.log(this.nodeInfo.ext)
 			this.nodeInfo.ext = JSON.parse(this.nodeInfo.ext.replace(/'/g, '"'))
 		}
-    console.log(this.nodeInfo.ext)
-    this.nodeInfo.ext.bin_img.forEach((value) =>{
-      this.fileList.push(value)
+    
+    this.fileNames = this.nodeInfo.ext.img
+    
+    this.fileNames.forEach((value,index) => {
+      // Axios.get(this.api_upload+'/'+value).then(res =>{
+        // this.fileNames.push(res.data.results)
+        // this.nodeInfo.ext.img.push(res.data.results)
+        // this.save()
+      //   console.log(res)
+      // })
+      this.fileList.push({
+        id: value,
+        url: this.$baseURL+this.api_upload_get+value,
+      })
     })
     console.log(this.fileList)
+    console.log(this.fileNames)
+    // this.nodeInfo.ext.img.forEach((value) =>{
+    //   this.fileNames.push(value)
+    // })
   },
   methods: {
     handleChange(file, fileList) {
-      this.images.push(file)
+      this.is_upload = true
+      let formData = new FormData()
+      formData.append('photo',file.raw)
+      Axios.post(this.api_upload,formData).then(res =>{
+        this.fileNames.push(res.data.results)
+        // this.nodeInfo.ext.img.push(res.data.results)
+        // this.save()
+      })
     },
     handleRemove(file, fileList) {
-      this.images.forEach((value,index) =>{
-          if(file.uid == value.uid){
-            this.images.splice(index,1)
-            this.$alert('删除成功', '成功')
-          } 
-      })
-      this.$alert('删除成功', '成功')
+      if(file.hasOwnProperty('id')) {
+        this.fileNames.forEach((value,index) => {
+          if(value == file.id) {
+            this.fileNames.splice(index,1)
+          }
+        })
+      }
     },
     save () {
       // this.$emit('back', false)
       //调API
       // console.log(this.images.length)
-      if(this.images.length === 0) {
-        Axios.put(this.api,this.nodeInfo)
-          .then(() => {
-            this.$alert('保存成功', '成功').then(() => {
-              this.$emit('update', true)
-            })
-          }).catch(e => {
-            this.error(e)
-            this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
+      this.nodeInfo.ext.img = this.fileNames
+      Axios.put(this.api,this.nodeInfo)
+        .then(() => {
+          this.$alert('保存成功', '成功').then(() => {
+            this.$emit('update', true)
           })
-      } else {
-        let reader =new FileReader();//创建读取文件的方法
-        // var img1=event.target.files[0];
-        let count = 0
-        reader.readAsDataURL(this.images[count].raw);//将文件已url的形式读入页面
-        let that=this;
-        reader.onload=function(e){ 
-          that.nodeInfo.ext.bin_img.push(e.target.result)
-          count ++
-          if (count < that.images.length) {
-            reader.readAsDataURL(that.images[count].raw)
-          } else {
-            Axios.put(that.api,that.nodeInfo)
-              .then(() => {
-                that.$alert('保存成功', '成功').then(() => {
-                  that.$emit('update', true)
-                })
-              }).catch(e => {
-                that.error(e)
-                this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
-              })
-          }
-        }
-      }
+        }).catch(e => {
+          this.error(e)
+          this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
+        })
+      // if(this.images.length === 0) {
+      //   Axios.put(this.api,this.nodeInfo)
+      //     .then(() => {
+      //       this.$alert('保存成功', '成功').then(() => {
+      //         this.$emit('update', true)
+      //       })
+      //     }).catch(e => {
+      //       this.error(e)
+      //       this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
+      //     })
+      // } else {
+      //   let reader =new FileReader();//创建读取文件的方法
+      //   // var img1=event.target.files[0];
+      //   let count = 0
+      //   reader.readAsDataURL(this.images[count].raw);//将文件已url的形式读入页面
+      //   let that=this;
+      //   reader.onload=function(e){ 
+      //     that.nodeInfo.ext.bin_img.push(e.target.result)
+      //     count ++
+      //     if (count < that.images.length) {
+      //       reader.readAsDataURL(that.images[count].raw)
+      //     } else {
+      //       Axios.put(that.api,that.nodeInfo)
+      //         .then(() => {
+      //           that.$alert('保存成功', '成功').then(() => {
+      //             that.$emit('update', true)
+      //           })
+      //         }).catch(e => {
+      //           that.error(e)
+      //           this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
+      //         })
+      //     }
+      //   }
+      // }
     },
     goBack() {
+      if(this.is_upload) {
+        this.save()
+      }
       this.$emit('back', false)
     }
   }

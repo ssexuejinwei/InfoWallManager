@@ -144,7 +144,7 @@
             autocomplete="off"
           />
           </el-form-item>
-          <el-form-item label="上传图片">
+         <!-- <el-form-item label="上传图片">
             <el-upload
               class="avatar-uploader"
               action="#"
@@ -157,7 +157,7 @@
               <img v-for="value in fileList" :src="value" class="avatar"/>
                <i v-if="fileList.length==0" class="el-icon-plus"></i>
             </el-upload>
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
         <span slot="footer" class="dialog-footer">
             <el-button @click="isAdd = false">取 消</el-button>
@@ -199,7 +199,7 @@ export default {
       nodeInfoForm:{ext:{
         title:'',
         content:'',
-        bin_img:[]
+        img:[]
       }},
       fileList:[],
       images:[],
@@ -272,42 +272,16 @@ export default {
       // console.log(index,row)
     },
     addnodeInfo() {
-      if(this.images.length === 0) {
-        Axios.post(this.api, this.nodeInfoForm)
-          .then(() => {
-            this.$alert('添加成功', '成功').then(() => {
-              this.getData()
-              this.isAdd = false
-            })
-          }).catch(e => {
-            console.error(e)
-            this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
+      Axios.post(this.api, this.nodeInfoForm)
+        .then(() => {
+          this.$alert('添加成功', '成功').then(() => {
+            this.getData()
+            this.isAdd = false
           })
-      } else {
-        let reader =new FileReader();//创建读取文件的方法
-        // var img1=event.target.files[0];
-        let count = 0
-        reader.readAsDataURL(this.images[count].raw);//将文件已url的形式读入页面
-        let that=this;
-        reader.onload=function(e){ 
-          that.nodeInfoForm.ext.bin_img.push(e.target.result)
-          count ++
-          if (count < that.images.length) {
-            reader.readAsDataURL(that.images[count].raw)
-          } else {
-            Axios.post(that.api, that.nodeInfoForm)
-              .then(() => {
-                that.$alert('添加成功', '成功').then(() => {
-                  that.getData()
-                  that.isAdd = false
-                })
-              }).catch(e => {
-                console.error(e)
-                that.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
-              })
-            }
-          }
-        }
+        }).catch(e => {
+          console.error(e)
+          this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
+        })
     },
     deletenodeInfo (nodeInfo) {
       const data = {
