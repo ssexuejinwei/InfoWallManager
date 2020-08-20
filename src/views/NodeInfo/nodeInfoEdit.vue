@@ -9,7 +9,7 @@
           <el-form
             :model="nodeInfo"
             label-width="100px"
-            style="width:31.25rem;"
+            style="width:80rem;"
           >
             <el-form-item
               label="节点名"
@@ -47,10 +47,17 @@
             <el-form-item
               label="详细信息"
             >
-            <el-input
+            <vue-editor id="editor"
+                  useCustomImageHandler
+                  @image-added="handleImageAdded" v-model="nodeInfo.ext.content"
+                  >
+                </vue-editor>
+            <!-- <vue-editor id="editor" useCustomImageHandler @imageAdded="handleImageAdded" :editor-toolbar="customToolbar" v-model="content"/> -->
+            <!-- <vue-editor v-model="nodeInfo.ext.content" :editor-toolbar="customToolbar"/> -->
+<!--            <el-input
               v-model="nodeInfo.ext.content"
               autocomplete="off"
-            />
+            /> -->
             </el-form-item>
             <el-form-item label="上传图片">
               <el-upload
@@ -80,8 +87,10 @@
 import Axios from 'axios'
 import qs from 'qs'
 import VDistpicker from 'v-distpicker'
+import { VueEditor } from "vue2-editor"
 export default {
   components: {
+    VueEditor,
     VDistpicker
   },
   props: {
@@ -99,45 +108,58 @@ export default {
       fileList:[],
       images:[],
       is_upload:false,
-      fileNames:[]
+      fileNames:[],
+      content:"",
+      customToolbar: [
+        ["bold", "italic", "underline"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["image", "code-block"]
+      ]
+    }
+  },
+  watch: {
+   content(newValue, oldValue) {
+      console.log(this.content.replace(/\"/g, "'"))
     }
   },
   created () {
     
+    
 		if(typeof(this.nodeInfo.ext)=='string') {
-      // console.log(this.nodeInfo.ext)
 			this.nodeInfo.ext = JSON.parse(this.nodeInfo.ext.replace(/'/g, '"'))
 		}
+    
+    let Base64 = require('js-base64').Base64
+    this.nodeInfo.ext.content = Base64.decode(this.nodeInfo.ext.content)
     
     this.fileNames = this.nodeInfo.ext.img
     
     this.fileNames.forEach((value,index) => {
-      // Axios.get(this.api_upload+'/'+value).then(res =>{
-        // this.fileNames.push(res.data.results)
-        // this.nodeInfo.ext.img.push(res.data.results)
-        // this.save()
-      //   console.log(res)
-      // })
       this.fileList.push({
         id: value,
         url: this.$baseURL+this.api_upload_get+value,
       })
     })
-    console.log(this.fileList)
-    console.log(this.fileNames)
-    // this.nodeInfo.ext.img.forEach((value) =>{
-    //   this.fileNames.push(value)
-    // })
   },
   methods: {
+    handleImageAdded(file, Editor, cursorLocation, resetUploader) {
+      console.log('i am here')
+      var formData = new FormData();
+      formData.append("photo", file);
+      Axios.post(this.api_upload,formData).then(res =>{
+        let url = this.$baseURL + this.api_upload_get +res.data.results; // Get url from response
+        Editor.insertEmbed(cursorLocation, "image", url);
+        resetUploader();
+      }).catch(err => {
+          console.log(err);
+        });
+    },
     handleChange(file, fileList) {
       this.is_upload = true
       let formData = new FormData()
       formData.append('photo',file.raw)
       Axios.post(this.api_upload,formData).then(res =>{
         this.fileNames.push(res.data.results)
-        // this.nodeInfo.ext.img.push(res.data.results)
-        // this.save()
       })
     },
     handleRemove(file, fileList) {
@@ -152,8 +174,10 @@ export default {
     save () {
       // this.$emit('back', false)
       //调API
-      // console.log(this.images.length)
+      let Base64 = require('js-base64').Base64
       this.nodeInfo.ext.img = this.fileNames
+      this.nodeInfo.ext.content = Base64.encode(this.nodeInfo.ext.content)
+      console.log(this.nodeInfo.ext.content)
       Axios.put(this.api,this.nodeInfo)
         .then(() => {
           this.$alert('保存成功', '成功').then(() => {
