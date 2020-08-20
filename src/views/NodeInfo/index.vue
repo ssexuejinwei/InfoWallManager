@@ -128,7 +128,7 @@
                 <el-radio :label="'3'">3</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item
+          <!-- <el-form-item
             label="详情标题"
           >
           <el-input
@@ -139,11 +139,8 @@
           <el-form-item
             label="详细信息"
           >
-          <el-input
-            v-model="nodeInfoForm.ext.content"
-            autocomplete="off"
-          />
-          </el-form-item>
+          <vue-editor v-model="nodeInfoForm.ext.content" />
+          </el-form-item> -->
          <!-- <el-form-item label="上传图片">
             <el-upload
               class="avatar-uploader"
@@ -311,6 +308,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  @import "~vue2-editor/dist/vue2-editor.css";
 .avatar-uploader .el-upload {
     border: 1px dashed #d9d9d9;
     border-radius: 6px;
