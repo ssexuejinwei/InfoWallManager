@@ -4,7 +4,7 @@
       <page-header title="三元组信息管理"/>
       <el-container>
         <el-main>
-          <div class = 'search'>
+          <div class = 'search' v-if="false">
             <el-input
               v-model="search.value"
               placeholder="请输入内容"

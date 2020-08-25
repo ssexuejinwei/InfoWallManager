@@ -2,33 +2,11 @@
   <div>
     <div v-if='!isEdit' class ='nodeInfolist'>
       <page-header title="节点详情信息管理"/>
+      <el-page-header v-if="isSearch" @back="goBack" />
       <el-container>
         <el-main>
          <div class = 'search'>
-         <el-input v-model="search.value" placeholder="请输入内容" style="width: 500px;text-align:center;">
-           <el-select
-             slot="prepend"
-             v-model="search.key"
-             placeholder="请选择"
-             style="width: 120px"
-           >
-             <el-option
-               label="节点名"
-               value="name"
-             />
-             <el-option
-               label="是否热点"
-               value="is_hot"
-             />
-             <el-option
-               label="重要程度"
-               value="importance"
-             />
-             <el-option
-               label="文字详情"
-               value="word"
-             />
-           </el-select>
+         <el-input v-model="search" @keyup.enter.native="handleSearch" placeholder="请输入内容" style="width: 500px;text-align:center;">
              <el-button
                slot="append"
                icon="el-icon-search"
@@ -179,14 +157,13 @@ export default {
   },
   data () {
     return {
-      search:{
-        value:'',
-        key:''
-      },
+      isSearch:false,
+      search:'',
       cur_page:1,
       total:2,
       api:'/api/node',
       apiGetAll:'/api/nodes',
+      api_search:'/api/search',
       imageUrl:'',
       selectednodeInfos:[],
       nodeInfo:{},
@@ -205,14 +182,49 @@ export default {
   },
   watch: {
     cur_page(newValue,oldValue) {
-      this.getData()
+      if(this.isSearch) {
+        this.getSearchData()
+      } else {
+        this.getData()
+      }
     }
   },
   created () {
     this.getData()
   },
   methods: {
+    goBack () {
+      this.isSearch = false
+      this.search = ''
+      this.getData()
+    },
+    getSearchData () {
+      Axios.post(this.api_search+'?page='+this.cur_page+'&size=10',
+        {
+          keyword:this.search,
+        }
+      ).then(response => {
+        this.nodeInfoTableData  = []
+        this.total = response.data.count
+        response.data.results[0].data.forEach((value) => {
+          this.nodeInfoTableData.push({
+            id: value.meta[0].id,
+            name:value.row[0].name,
+            ext:value.row[0].ext,
+            importance:value.row[0].importance,
+            is_hot:value.row[0].is_hot
+          })
+        })
+      }).catch(e => {
+        console.error(e)
+        this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
+        this.nodeInfoTableData = []
+      }).finally(() => { this.loading = false })
+    },
     handleSearch () {
+      this.isSearch = true
+      this.cur_page = 1
+      this.getSearchData()
     },
     handleChange(file, fileList) {
       this.images.push(file)
