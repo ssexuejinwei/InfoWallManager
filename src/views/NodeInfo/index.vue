@@ -196,6 +196,7 @@ export default {
     goBack () {
       this.isSearch = false
       this.search = ''
+      this.cur_page = 1
       this.getData()
     },
     getSearchData () {
@@ -267,7 +268,11 @@ export default {
       // this.isEdit = false
       if (val) {
         //获取新数据
-        this.getData()
+        if(this.isSearch) {
+          this.getSearchData()
+        } else {
+          this.getData()
+        }
         this.isEdit = false
       }
     },
