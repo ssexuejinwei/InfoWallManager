@@ -47,6 +47,9 @@
             <el-form-item
               label="详细信息"
             >
+            <span style="color: red;font-weight: bold;">注意事项：1. 图片必须从工具栏插入
+2. 不超过2000字
+3. 不超过5张图片。</span>
             <vue-editor id="editor"
                   useCustomImageHandler
                   @image-added="handleImageAdded" v-model="nodeInfo.ext.content"
@@ -114,12 +117,13 @@ export default {
         ["bold", "italic", "underline"],
         [{ list: "ordered" }, { list: "bullet" }],
         ["image", "code-block"]
-      ]
+      ],
+      maxsize:10000
     }
   },
   watch: {
    content(newValue, oldValue) {
-      console.log(this.content.replace(/\"/g, "'"))
+      // console.log(this.content.replace(/\"/g, "'"))
     }
   },
   created () {
@@ -143,7 +147,7 @@ export default {
   },
   methods: {
     handleImageAdded(file, Editor, cursorLocation, resetUploader) {
-      console.log('i am here')
+      // console.log('i am here')
       var formData = new FormData();
       formData.append("photo", file);
       Axios.post(this.api_upload,formData).then(res =>{
@@ -151,7 +155,7 @@ export default {
         Editor.insertEmbed(cursorLocation, "image", url);
         resetUploader();
       }).catch(err => {
-          console.log(err);
+          // console.log(err);
         });
     },
     handleChange(file, fileList) {
@@ -177,7 +181,13 @@ export default {
       let Base64 = require('js-base64').Base64
       this.nodeInfo.ext.img = this.fileNames
       this.nodeInfo.ext.content = Base64.encode(this.nodeInfo.ext.content)
-      console.log(this.nodeInfo.ext.content)
+      // console.log(this.nodeInfo.ext.content.length)
+      if(this.nodeInfo.ext.content.length > this.maxsize) {
+        this.$alert('输入内容有误，请重新输入')
+        this.nodeInfo.ext.content = Base64.decode(this.nodeInfo.ext.content)
+        return
+      }
+      // console.log(this.nodeInfo.ext.content)
       Axios.put(this.api,this.nodeInfo)
         .then(() => {
           this.$alert('保存成功', '成功').then(() => {

@@ -181,6 +181,11 @@ export default {
     }
   },
   watch: {
+    search(newValue,oladValue) {
+      if(newValue == '') {
+        this.isSearch = false
+      }
+    },
     cur_page(newValue,oldValue) {
       if(this.isSearch) {
         this.getSearchData()
@@ -223,9 +228,13 @@ export default {
       }).finally(() => { this.loading = false })
     },
     handleSearch () {
-      this.isSearch = true
-      this.cur_page = 1
-      this.getSearchData()
+      if(this.search == '') {
+        this.getData()
+      } else {
+        this.isSearch = true
+        this.cur_page = 1
+        this.getSearchData()
+      }
     },
     handleChange(file, fileList) {
       this.images.push(file)

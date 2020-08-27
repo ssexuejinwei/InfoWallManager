@@ -2,29 +2,11 @@
   <div>
     <div v-if='!isEdit' class ='triplelist'>
       <page-header title="三元组信息管理"/>
+      <el-page-header v-if="isSearch" @back="goBack" />
       <el-container>
         <el-main>
-          <div class = 'search' v-if="false">
-            <el-input
-              v-model="search.value"
-              placeholder="请输入内容"
-              style="width: 500px;text-align:center;"
-            >
-            <el-select
-              slot="prepend"
-              v-model="search.key"
-              placeholder="请选择"
-              style="width: 120px"
-            >
-              <el-option
-                label="节点"
-                value="node"
-              />
-              <el-option
-                label="关系"
-                value="relation"
-              />
-            </el-select>
+          <div class = 'search'>
+          <el-input v-model="search" @keyup.enter.native="handleSearch" placeholder="请输入内容" style="width: 500px;text-align:center;">
               <el-button
                 slot="append"
                 icon="el-icon-search"
@@ -125,6 +107,17 @@
       <el-dialog title="三元组信息" :visible.sync="isAdd ">
         <!-- 待添加节点 -->
         <el-dialog title="节点" :visible.sync="isChoose" append-to-body>
+					<div class = 'search'>
+					<el-input v-model="dialogSearch" @keyup.enter.native="handleDialogSearch" placeholder="请输入内容" style="width: 500px;text-align:center;">
+					    <el-button
+					      slot="append"
+					      icon="el-icon-search"
+					      class="search"
+					      @click="handleDialogSearch"
+					    />
+					  </el-input>
+					</div>
+          <br/>
           <el-table
             :data="nodeTableData"
             highlight-current-row
@@ -245,10 +238,7 @@ export default {
   data () {
     return {
       loading:true,
-      search:{
-        value:'',
-        key:''
-      },
+      search:'',
       cur_page:1,
       cur_page_add:1,
       total_add:2,
@@ -256,6 +246,8 @@ export default {
       api:'/api/rel',
       apiGetAll:'/api/rels',
       apiNodes:'/api/nodes',
+      api_search_dialog:'/api/search',
+      api_search:'/api/rsearch',
       imageUrl:'',
       selectedtriples:[],
       triple:{},
@@ -265,15 +257,31 @@ export default {
       tripleTableData:[],
       tripleForm:{},
       nodeTableData : [],
-      options:[]
+      options:[],
+      dialogSearch:'',
+      isDialogSearch:false,
+      isSearch:false,
     }
   },
   watch: {
+    search(newValue,oladValue) {
+      if(newValue == '') {
+        this.isSearch = false
+      }
+    },
     cur_page(newValue,oldValue) {
-      this.getData()
+      if(this.isSearch) {
+        this.getSearchData()()
+      } else {
+        this.getData()
+      }
     },
     cur_page_add(newValue,oldValue) {
-      this.getNodes()
+      if(this.isDialogSearch) {
+        this.getDialogSearchData()
+      } else {
+        this.getNodes()
+      }
     }
   },
   created () {
@@ -281,15 +289,73 @@ export default {
    this.getNodes()
   },
   methods: {
+    goBack () {
+      this.isSearch = false
+      this.search = ''
+      this.cur_page = 1
+      this.getData()
+    },
+    getSearchData () {
+      Axios.post(this.api_search+'?page='+this.cur_page+'&size=10',
+        {
+          keyword:this.search,
+        }
+      ).then(response => {
+        this.total = response.data.count
+        this.tripleTableData  = response.data.results[0].data
+      }).catch(e => {
+        console.error(e)
+        this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
+        this.tripleTableData  = []
+      }).finally(() => { this.loading = false })
+    },
+    handleSearch () {
+      if(this.search == '') {
+        this.getData()
+      } else {
+        this.isSearch = true
+        this.cur_page = 1
+        this.getSearchData()
+      }
+    },
+    getDialogSearchData () {
+      Axios.post(this.api_search_dialog+'?page='+this.cur_page_add+'&size=10',
+        {
+          keyword:this.dialogSearch,
+        }
+      ).then(response => {
+        this.nodeTableData  = []
+        this.total_add = response.data.count
+        response.data.results[0].data.forEach((value) => {
+          this.nodeTableData.push({
+            id: value.meta[0].id,
+            name:value.row[0].name,
+            ext:value.row[0].ext,
+            importance:value.row[0].importance,
+            is_hot:value.row[0].is_hot
+          })
+        })
+      }).catch(e => {
+        console.error(e)
+        this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
+        this.nodeInfoTableData = []
+      }).finally(() => { this.loading = false })
+    },
+    handleDialogSearch () {
+      if(this.dialogSearch == '') {
+        this.getNodes()
+      } else {
+        this.getDialogSearchData()
+        this.isDialogSearch = true
+        this.cur_page_add = 1
+      }
+    },
     handleChoose(index,row) {
       this.options.push({
         value:this.nodeTableData[index].id,
         label:this.nodeTableData[index].name
       })
       this.nodeTableData[index].disable = true
-    },
-    handleSearch () {
-      // this.isLoading = true
     },
     getNodes() {
       Axios.get(this.apiNodes,{
