@@ -49,7 +49,7 @@
             >
             <span style="color: red;font-weight: bold;">注意事项：1. 图片必须从工具栏插入
 2. 不超过2000字
-3. 不超过5张图片。</span>
+3. 不超过5张图片</span>
             <vue-editor id="editor"
                   useCustomImageHandler
                   @image-added="handleImageAdded" v-model="nodeInfo.ext.content"
