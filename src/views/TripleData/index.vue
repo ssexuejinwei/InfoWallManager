@@ -192,7 +192,7 @@
             label="关系"
           >
           <el-input
-            v-model="tripleForm.label"
+            v-model="tripleForm.relation"
             autocomplete="off"
           />
           </el-form-item>
