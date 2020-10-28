@@ -1,7 +1,6 @@
 <template>
   <div class="nodeInfoEditInfo">
-    <page-header title="添加热点新闻节点" />
-    <el-page-header @back="goBack" />
+    <page-header style="background-color: #EBEEF5;" title="热点新闻节点" />
     <!-- <el-divider direction="" /> -->
     <el-container>
         <el-main>
@@ -9,7 +8,9 @@
             :model="nodeInfo"
             label-position='left'
             label-width="140px"
+            style="border-radius: 4px; background-color: #FFFFFF; padding: 20px;"
           >
+            <page-header title="添加热点新闻节点" />
             <el-form-item
               label="热点新闻节点名称"
             >
@@ -89,6 +90,7 @@
           </el-form>
         </el-main>
         <el-footer>
+          <div style="border-radius: 4px; background-color: #FFFFFF; padding: 20px;">
           <page-header title="添加热点新闻节点关系" />
           <el-form :model="relationList"  label-width="140px" >
             <div v-for="(relation,index) in relationList">
@@ -133,13 +135,19 @@
               <el-button  @click="addRelation" v-show="addRclick">确定</el-button>
             </el-col>
           </el-row>
+          </div>
+          <div style="padding: 20px;"></div>
           <el-row>
-            <el-col :span="2" :offset="20">
+            <el-col :span="6" :offset="20">
+              <el-button @click="goBack" style="background-color: #FFFFFF">
+                返回
+                </el-button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <el-button @click="save" style="background-color: #5f82ff" type="primary">
                 保存
               </el-button>
             </el-col>
           </el-row>
+          <div style="padding: 20px;"></div>
         </el-footer>
           
         <el-dialog
@@ -150,7 +158,7 @@
           <el-row>
             <el-radio-group v-model="ishotRadio" fill="#5f82ff" size="small">
               <el-radio-button label="0">热点新闻节点</el-radio-button>
-              <el-radio-button label="1">非热点新闻节点</el-radio-button>
+              <el-radio-button label="1">其他新闻节点</el-radio-button>
             </el-radio-group>
           </el-row>
           <br>
@@ -178,7 +186,8 @@
             v-loading="loading"
             :data="nodeInfoTableData"
             highlight-current-row
-            :border="true"
+            :border="false"
+			style="border-radius: 4px"
           >
             <el-table-column
               prop="name"

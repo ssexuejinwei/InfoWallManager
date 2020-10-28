@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="displayType==0" class ='nodeInfolist'>
-      <page-header title="热点新闻节点"/>
+      <page-header  style="background-color: #EBEEF5; border: none;"  title="热点新闻节点"/>
       <el-page-header v-if="isSearch" @back="goBack" />
       <el-container>
         <el-main>
@@ -34,15 +34,17 @@
          <br>
           <!-- <p>热点新闻节点编辑</p> -->
           <el-table
-           :header-cell-style="{background:'#D5D8DE'}"
+           :header-cell-style="{background:'#EBEEF5'}"
             v-loading="loading"
             :data="nodeInfoTableData"
             @selection-change="handleSelect"
             highlight-current-row
-            :border="true"
+            :border="false"
+            style="border-radius: 4px"
           >
             <el-table-column
               type="selection"
+              align="center"
             />
             <el-table-column
               prop="name"
@@ -84,19 +86,18 @@
             </el-table-column>
           </el-table>
         </el-main>
-        <el-footer>
-          <div style="text-align: right;">
+        <el-footer style="text-align: right;">
+          <div style="text-align: left;">
             <el-pagination
+              background
               layout="prev, pager, next"
               :total="total"
-              :current-page.sync="cur_page"
-            />
+              :current-page.sync="cur_page">
+            </el-pagination>
           </div>
               <el-button @click='addNode'>添加</el-button>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <el-button @click="deletenodeInfos">
-                删除
-              </el-button>
+              <el-button @click="deletenodeInfos">删除</el-button>
         </el-footer>
       </el-container>
       

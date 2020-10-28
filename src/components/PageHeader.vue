@@ -47,7 +47,7 @@ header {
 }
 
 .title {
-  border-bottom: 1px rgba(0,0,0,0.15) solid;
+  border-bottom: 0px rgba(0,0,0,0.15) solid;
   padding: 12px 20px;
   color: #444;
 }

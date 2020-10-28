@@ -3,7 +3,7 @@
     <div class="auth-form-wrapper">
       <h2>
         <i class="el-icon-d-arrow-right" />
-        春嘉邻聚力后台管理系统
+        后台管理系统
       </h2>
       <el-form
         ref="form"
