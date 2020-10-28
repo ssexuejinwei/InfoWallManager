@@ -61,6 +61,7 @@
           >
             <el-table-column
               type="selection"
+              align="center"
             />
             <el-table-column
               label="源节点名称"

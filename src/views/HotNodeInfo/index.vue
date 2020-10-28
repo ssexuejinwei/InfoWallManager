@@ -44,6 +44,7 @@
           >
             <el-table-column
               type="selection"
+              align="center"
             />
             <el-table-column
               prop="name"

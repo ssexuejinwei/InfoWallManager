@@ -1,15 +1,17 @@
 <template>
   <div class="nodeInfoEditInfo">
-    <page-header style="background-color: #EBEEF5;" title="添加其他节点" />
+    <page-header style="background-color: #EBEEF5;" title="其他节点" />
     <!-- <el-divider direction="" /> -->
     <el-container>
         <el-main>
           <el-form
             :model="nodeInfo"
             label-width="140px"
+            style="border-radius: 4px; background-color: #FFFFFF; padding: 20px;"
           >
+            <page-header title="添加其他节点" />
             <el-form-item
-              label="节点名称"
+              label="其他节点名称"
             >
               <el-input
                 v-model="nodeInfo.name"
@@ -17,7 +19,7 @@
               />
             </el-form-item>
             <el-form-item
-              label="时间"
+              label="其他时间"
             >
               <el-date-picker
                     v-model="nodeInfo.date"
@@ -26,7 +28,7 @@
                   </el-date-picker>
             </el-form-item>
             <el-form-item
-              label="类型"
+              label="其他类型"
             >
               <el-select v-model="nodeInfo.type" placeholder="请选择">
                   <el-option
@@ -87,7 +89,8 @@
           </el-form>
         </el-main>
         <el-footer>
-          <page-header title="添加节点关系" />
+          <div style="border-radius: 4px; background-color: #FFFFFF; padding: 20px;">
+          <page-header title="添加其他节点关系" />
           <el-form :model="relationList"  label-width="140px">
             <div v-for="(relation,index) in relationList">
               <el-form-item :label="'关系'+String(index+1)" >
@@ -131,8 +134,10 @@
               <el-button  @click="addRelation" v-show="addRclick">确定</el-button>
             </el-col>
           </el-row>
+          </div>
+          <div style="padding: 20px;"></div>
           <el-row>
-            <el-col :span="8" :offset="20">
+            <el-col :span="6" :offset="20">
               <el-button @click="goBack" style="background-color: #FFFFFF">
                 返回
                 </el-button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -141,6 +146,7 @@
               </el-button>
             </el-col>
           </el-row>
+          <div style="padding: 20px;"></div>
         </el-footer>
           
         <el-dialog
@@ -151,7 +157,7 @@
           <el-row>
             <el-radio-group v-model="ishotRadio" fill="#5f82ff" size="small">
               <el-radio-button label="0">热点新闻节点</el-radio-button>
-              <el-radio-button label="1">非热点新闻节点</el-radio-button>
+              <el-radio-button label="1">其他节点</el-radio-button>
             </el-radio-group>
           </el-row>
           <br>
@@ -247,7 +253,7 @@ export default {
       cur_page:1,
       total:2,
       options:[],
-      type:['','人','物','地点','其他'],
+      type:['','通知公告','特色培养','招生信息','党建动态','校友专栏'],
       nodeRelationForm:[],
       nodeInfoTableData:[],
       isChoose: false,

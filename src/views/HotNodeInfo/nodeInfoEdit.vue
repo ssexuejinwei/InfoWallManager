@@ -1,13 +1,15 @@
 <template>
   <div class="nodeInfoEditInfo">
-    <page-header style="background-color: #EBEEF5;" title="修改热点新闻节点" />
+    <page-header style="background-color: #EBEEF5;" title="热点新闻节点" />
     <!-- <el-divider direction="" /> -->
     <el-container>
         <el-main>
           <el-form
             :model="nodeInfo"
             label-width="140px"
+            style="border-radius: 4px; background-color: #FFFFFF; padding: 20px;"
           >
+            <page-header title="修改热点新闻节点" />
             <el-form-item
               label="热点新闻节点名称"
             >
@@ -25,7 +27,7 @@
                     placeholder="选择日期">
                   </el-date-picker>
             </el-form-item>
-            <el-form-item
+            <el-form-item>
               label="热点新闻类型"
             >
               <el-select v-model="nodeInfo.type" placeholder="请选择">
@@ -87,9 +89,10 @@
           </el-form>
         </el-main>
         <el-footer>
+          <div style="border-radius: 4px; background-color: #FFFFFF; padding: 20px;">
           <page-header title="添加热点新闻节点关系" />
           <el-form :model="relationList"  label-width="140px">
-            <div v-for="(relation,index) in relationList">
+          <div v-for="(relation,index) in relationList">
               <el-form-item :label="'关系'+String(index+1)" >
                 <el-input :value="relation" disabled>
                 </el-input>
@@ -131,8 +134,10 @@
               <el-button  @click="addRelation" v-show="addRclick">确定</el-button>
             </el-col>
           </el-row>
+          </div>
+          <div style="padding: 20px;"></div>
           <el-row>
-            <el-col :span="8" :offset="20">
+            <el-col :span="6" :offset="20">
               <el-button @click="goBack" style="background-color: #FFFFFF">
                 返回
                 </el-button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -141,6 +146,7 @@
               </el-button>
             </el-col>
           </el-row>
+          <div style="padding: 20px;"></div>
         </el-footer>
           
         <el-dialog
@@ -151,7 +157,7 @@
           <el-row>
             <el-radio-group v-model="ishotRadio" fill="#5f82ff" size="small">
               <el-radio-button label="0">热点新闻节点</el-radio-button>
-              <el-radio-button label="1">非热点新闻节点</el-radio-button>
+              <el-radio-button label="1">其他新闻节点</el-radio-button>
             </el-radio-group>
           </el-row>
           <br>
