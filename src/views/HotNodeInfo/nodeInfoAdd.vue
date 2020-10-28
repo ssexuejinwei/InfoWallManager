@@ -7,6 +7,7 @@
         <el-main>
           <el-form
             :model="nodeInfo"
+            label-position='left'
             label-width="140px"
           >
             <el-form-item
@@ -89,7 +90,7 @@
         </el-main>
         <el-footer>
           <page-header title="添加热点新闻节点关系" />
-          <el-form :model="relationList"  label-width="140px">
+          <el-form :model="relationList"  label-width="140px" >
             <div v-for="(relation,index) in relationList">
               <el-form-item :label="'关系'+String(index+1)" >
                 <el-input :value="relation" disabled>
