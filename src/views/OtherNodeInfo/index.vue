@@ -1,22 +1,39 @@
 <template>
   <div>
-    <div v-if='!isEdit' class ='nodeInfolist'>
-      <page-header title="节点详情信息管理"/>
+    <div v-if="displayType==0" class ='nodeInfolist'>
+      <page-header title="其他节点"/>
       <el-page-header v-if="isSearch" @back="goBack" />
       <el-container>
         <el-main>
-         <div class = 'search'>
-         <el-input v-model="search" @keyup.enter.native="handleSearch" placeholder="请输入内容" style="width: 500px;text-align:center;">
-             <el-button
-               slot="append"
-               icon="el-icon-search"
-               class="search"
-               @click="handleSearch"
-             />
-           </el-input>
-         </div>
-          <br/>
+          <el-row>
+           <el-col :span="8">
+             <div class = 'radio-group'>
+               <el-radio-group v-model="typeRadio" fill="#5f82ff">
+                     <el-radio-button label="0">全部</el-radio-button>
+                     <el-radio-button label="1">人</el-radio-button>
+                     <el-radio-button label="2">物</el-radio-button>
+                     <el-radio-button label="3">地点</el-radio-button>
+                     <el-radio-button label="4">其他</el-radio-button>
+                   </el-radio-group>
+             </div>
+           </el-col> 
+           <el-col :span="12">
+               <div class = 'search'>
+               <el-input v-model="search" @keyup.enter.native="handleSearch" placeholder="请输入内容" style="width: 500px;text-align:center;">
+                   <el-button
+                     slot="append"
+                     icon="el-icon-search"
+                     class="search"
+                     @click="handleSearch"
+                   />
+                 </el-input>
+               </div>
+             </el-col>
+         </el-row>
+         <br>
+          <!-- <p>热点新闻节点编辑</p> -->
           <el-table
+           :header-cell-style="{background:'#D5D8DE'}"
             v-loading="loading"
             :data="nodeInfoTableData"
             @selection-change="handleSelect"
@@ -28,33 +45,34 @@
             />
             <el-table-column
               prop="name"
-              label="节点名"
+              label="其他节点名称"
               align="center"
             />
             <el-table-column
-              label="是否热点"
+              label="其他节点类型"
               align="center"
             >
               <template slot-scope="scope">
-                <span v-if="scope.row.is_hot=='false'">否</span>
-                <span v-if="scope.row.is_hot=='true'">是</span>
+                <span>{{type[scope.row.type]}}</span>
               </template>
             </el-table-column>
-            <el-table-column
+            <!-- <el-table-column
               prop="importance"
               label="重要等级"
               align="center"
-            />
+            /> -->
             <el-table-column
               label="操作"
               align="center"
             >
               <template slot-scope="scope">
                 <el-button
+                  type="primary"
+                  style="background-color: #5F82FF;"
                   size="medium"
                   @click="handleEdit(scope.$index,scope.row)"
                 >
-                  详情
+                  修改
                 </el-button>
               </template>
             </el-table-column>
@@ -68,80 +86,20 @@
               :current-page.sync="cur_page"
             />
           </div>
-              <el-button @click='isAdd = true'>添加</el-button>
+              <el-button @click='addNode'>添加</el-button>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <el-button @click="deletenodeInfos">
                 删除
               </el-button>
         </el-footer>
       </el-container>
-      <el-dialog title="节点详情信息" :visible.sync="isAdd ">
-        <el-form
-          :model="nodeInfoForm"
-          label-width="100px"
-          style="width:31.25rem;"
-        >
-          <el-form-item
-            label="节点名"
-          >
-            <el-input
-              v-model="nodeInfoForm.name"
-              autocomplete="off"
-            />
-          </el-form-item>
-          <el-form-item
-            label="是否热点"
-          >
-            <el-radio-group v-model="nodeInfoForm.is_hot">
-                <el-radio :label="'false'">否</el-radio>
-                <el-radio :label="'true'">是</el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item
-            label="重要程度"
-          >
-            <el-radio-group v-model="nodeInfoForm.importance">
-                <el-radio :label="'1'">1</el-radio>
-                <el-radio :label="'2'">2</el-radio>
-                <el-radio :label="'3'">3</el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <!-- <el-form-item
-            label="详情标题"
-          >
-          <el-input
-            v-model="nodeInfoForm.ext.title"
-            autocomplete="off"
-          />
-          </el-form-item>
-          <el-form-item
-            label="详细信息"
-          >
-          <vue-editor v-model="nodeInfoForm.ext.content" />
-          </el-form-item> -->
-         <!-- <el-form-item label="上传图片">
-            <el-upload
-              class="avatar-uploader"
-              action="#"
-              ref="upload"
-              list-type="picture"
-              :file-list="fileList"
-              :on-change="handleChange"
-              :auto-upload="false"
-              >
-              <img v-for="value in fileList" :src="value" class="avatar"/>
-               <i v-if="fileList.length==0" class="el-icon-plus"></i>
-            </el-upload>
-          </el-form-item> -->
-        </el-form>
-        <span slot="footer" class="dialog-footer">
-            <el-button @click="isAdd = false">取 消</el-button>
-            <el-button type="primary" @click="addnodeInfo">确 定</el-button>
-          </span>
-        </el-dialog>
+      
     </div>
-    <div v-if="isEdit" class ='nodeInfoInfo'>
+    <div v-if="displayType==1" class ='nodeInfoInfo'>
       <nodeInfoEdit :nodeInfo='nodeInfo' @update="handleEditFinish" @back="backHome"></nodeInfoEdit>
+    </div>
+    <div v-if="displayType==2">
+      <nodeInfoAdd  @update="handleAddFinish" @back="backHome"></nodeInfoAdd>
     </div>
   </div>
 </template>
@@ -149,18 +107,23 @@
 <script>
   //这里的跳转有问题
 import nodeInfoEdit from './nodeInfoEdit'
+import nodeInfoAdd from './nodeInfoAdd'
 import Axios from 'axios'
 import qs from 'querystring'
 export default {
   components: {
-    nodeInfoEdit
+    nodeInfoEdit,
+    nodeInfoAdd
   },
   data () {
     return {
+      displayType:0,//0首页，1 edit，2add，
+      type:['','人','物','地点','其他'],
+      typeRadio:'0',
       isSearch:false,
       search:'',
       cur_page:1,
-      total:2,
+      total:12,
       api:'/api/node',
       apiGetAll:'/api/nodes',
       api_search:'/api/search',
@@ -195,9 +158,22 @@ export default {
     }
   },
   created () {
-    this.getData()
+    // this.getData()
+    let array =['1','2','3','4','3']
+    array.forEach((value,index) => {
+      this.nodeInfoTableData.push({
+        id:index,
+        name:"textss",
+        date:"2020/10/1",
+        type:value,
+      })
+    })
+    this.loading=false
   },
   methods: {
+    addNode(){
+      this.displayType = 2
+    },
     goBack () {
       this.isSearch = false
       this.search = ''
@@ -282,15 +258,27 @@ export default {
         } else {
           this.getData()
         }
-        this.isEdit = false
+        this.displayType = 0
+      }
+    },
+    handleAddFinish (val) {
+      // this.isEdit = false
+      if (val) {
+        //获取新数据
+        if(this.isSearch) {
+          this.getSearchData()
+        } else {
+          this.getData()
+        }
+        this.displayType = 0
       }
     },
     backHome (val) {
-      this.isEdit = val
+      this.displayType = val
       // this.getData()
     },
     handleEdit(index,row) {
-      this.isEdit = true
+      this.displayType = 1
       this.nodeInfo = this.nodeInfoTableData[index]
       // console.log(index,row)
     },

@@ -20,17 +20,16 @@
         :collapse="collapse"
         :collapse-transition="false"
       >
-      <el-menu-item index="/nodeInfo">
-        <template slot="title">
-          <i class="el-icon-info"></i>
-          <span>节点详情信息管理</span>
-        </template>
-      </el-menu-item>
+       <el-submenu index="1">
+          <template slot="title">
+            <!-- <i class="el-icon-location"></i> -->
+            <span>详情信息管理</span>
+          </template>
+          <el-menu-item index="hotnodeInfo">热点新闻节点</el-menu-item>
+          <el-menu-item index="othernodeInfo">其他节点</el-menu-item>
+      </el-submenu>
       <el-menu-item index="/tripleData">
-        <template slot="title">
-          <i class="el-icon-news"></i>
           <span>三元组管理</span>
-        </template>
       </el-menu-item>
       </el-menu>
     </el-aside>

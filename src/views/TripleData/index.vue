@@ -5,19 +5,55 @@
       <el-page-header v-if="isSearch" @back="goBack" />
       <el-container>
         <el-main>
-          <div class = 'search'>
-          <el-input v-model="search" @keyup.enter.native="handleSearch" placeholder="请输入内容" style="width: 500px;text-align:center;">
-              <el-button
-                slot="append"
-                icon="el-icon-search"
-                class="search"
-                @click="handleSearch"
-              />
-            </el-input>
-          </div>
+          <el-row>
+            <el-col :span="4">
+              <div class = 'radio-group'>
+                <el-radio-group v-model="typeRadio" fill="#5f82ff" size="big">
+                      <el-radio-button label="0">热点新闻</el-radio-button>
+                      <el-radio-button label="1">其他节点</el-radio-button>
+                    </el-radio-group>
+              </div>
+            </el-col> 
+            <el-col :span="12" v-if="typeRadio == '0'" :offset="1">
+              <div class = 'radio-group'>
+                <el-radio-group v-model="secondRadio" fill="#5f82ff" size="big">
+                      <el-radio-button label="0">全部信息</el-radio-button>
+                      <el-radio-button label="1">热点新闻</el-radio-button>
+                      <el-radio-button label="2">特色培养</el-radio-button>
+                      <el-radio-button label="3">招生信息</el-radio-button>
+                      <el-radio-button label="4">党建动态</el-radio-button>
+                      <el-radio-button label="5">校友专栏</el-radio-button>
+                    </el-radio-group>
+              </div>
+            </el-col> 
+            <el-col :span="8" v-if="typeRadio == '1'" :offset="1">
+              <div class = 'radio-group'>
+                <el-radio-group v-model="secondRadio" fill="#5f82ff" size="big">
+                      <el-radio-button label="0">全部信息</el-radio-button>
+                      <el-radio-button label="1">人</el-radio-button>
+                      <el-radio-button label="2">物</el-radio-button>
+                      <el-radio-button label="3">地点</el-radio-button>
+                      <el-radio-button label="4">其他</el-radio-button>
+                    </el-radio-group>
+              </div>
+            </el-col> 
+            <el-col :span="6" :offset="1">
+                <div class = 'search'>
+                <el-input v-model="search" @keyup.enter.native="handleSearch" placeholder="请输入内容" style="width: 300px;text-align:center;">
+                    <el-button
+                      slot="append"
+                      icon="el-icon-search"
+                      class="search"
+                      @click="handleSearch"
+                    />
+                  </el-input>
+                </div>
+              </el-col>
+          </el-row>
            <br/>
           <el-table
             v-loading="loading"
+            :header-cell-style="{background:'#D5D8DE'}"
             :data="tripleTableData"
             @selection-change="handleSelect"
             highlight-current-row
@@ -27,25 +63,19 @@
               type="selection"
             />
             <el-table-column
-              prop="source"
-              label="源节点ID"
-              align="center"
-            />
-            <el-table-column
-              label="节点名"
+              label="源节点名称"
               align="center"
             >
               <template slot-scope="scope">
-                {{scope.row.source_node.name}}
+                {{scope.row.source_name}}
               </template>
             </el-table-column>
             <el-table-column
-              label="是否热点"
+              label="源节点类型"
               align="center"
             >
               <template slot-scope="scope">
-                <span v-if="scope.row.source_node.is_hot=='false'">否</span>
-                <span v-if="scope.row.source_node.is_hot=='true'">是</span>
+                <span>{{type[scope.row.source_type]}}</span>
               </template>
             </el-table-column>
             <el-table-column
@@ -54,40 +84,21 @@
               align="center"
             />
             <el-table-column
-              prop="target"
-              label="尾节点ID"
-              align="center"
-            />
-            <el-table-column
-              label="节点名"
+              label="尾节点名称"
               align="center"
             >
               <template slot-scope="scope">
-                {{scope.row.target_node.name}}
+                {{scope.row.tail_name}}
               </template>
             </el-table-column>
             <el-table-column
-              label="是否热点"
+              label="尾节点类型"
               align="center"
             >
               <template slot-scope="scope">
-                <span v-if="scope.row.target_node.is_hot=='false'">否</span>
-                <span v-if="scope.row.target_node.is_hot=='true'">是</span>
+                <span>{{type[scope.row.tail_type]}}</span>
               </template>
             </el-table-column>
-           <!-- <el-table-column
-              label="操作"
-              align="center"
-            >
-              <template slot-scope="scope">
-                <el-button
-                  size="medium"
-                  @click="handleEdit(scope.$index,scope.row)"
-                >
-                  编辑
-                </el-button>
-              </template>
-            </el-table-column> -->
           </el-table>
         </el-main>
         <el-footer>
@@ -237,6 +248,9 @@ export default {
   },
   data () {
     return {
+      type:['','通知公告','特色培养','招生信息','党建动态','校友专栏'],
+      secondRadio:"0",
+      typeRadio:"0",
       loading:true,
       search:'',
       cur_page:1,
@@ -285,8 +299,19 @@ export default {
     }
   },
   created () {
-   this.getData()
-   this.getNodes()
+    let array =['1','2','3','3','2']
+    array.forEach((value,index) => {
+      this.tripleTableData.push({
+        source_name:'www',
+        source_type:value,
+        tail_name:'fff',
+        tail_type:value,
+        label:'xxx'
+      })
+    })
+    this.loading = false
+   // this.getData()
+   // this.getNodes()
   },
   methods: {
     goBack () {

@@ -40,8 +40,12 @@ const routes = [
         component: () => import('@/views/TripleData/index')
       },
       {
-        path: '/nodeInfo',
-        component: () => import('@/views/NodeInfo/index')
+        path: '/hotnodeInfo',
+        component: () => import('@/views/HotNodeInfo/index'),
+      },
+      {
+        path: '/othernodeInfo',
+        component: () => import('@/views/OtherNodeInfo/index')
       }
     ]
   },
