@@ -12,8 +12,8 @@
       </div>
       <el-menu
         class="menu"
-        background-color="#171a2c"
-        text-color="#fff"
+        background-color="#FFFFFF"
+        text-color="#303133"
         active-text-color="#fff"
         router
         :default-active="defaultActive"
@@ -33,14 +33,14 @@
       </el-menu-item>
       </el-menu>
     </el-aside>
-    <el-container>
+    <el-container style="background-color: #F5F7FA;">
       <el-header class="header">
         <div
           class="collapse-button"
           :class="{ active: collapse }"
           @click="toggleCollapse"
         >
-          <i class="el-icon-s-fold" />
+          <i class="el-icon-s-fold" style="color: black;"/>
         </div>
         <div
           class="logo-2"
@@ -48,11 +48,7 @@
         >
           信息墙数据管理后台
         </div>
-        <div class="right">
-          <el-button type="text" @click="logout">
-            登出
-          </el-button>
-        </div>
+
       </el-header>
       <el-main>
         <router-view />
@@ -130,21 +126,21 @@ export default {
   line-height: 60px;
   text-align: center;
 
-  background: #0f1218;
-  color: rgba(255,255,255, 0);
+  background: #FFFFFF;
+  color: #FFFFFF;
   transition: 200ms color;
 
   font-weight: bold;
   &.is-active {
-    color: rgba(255,255,255, 1);
+    color: #303133;
   }
 }
 
 .logo-2 {
-  color: rgba(255,255,255, 0);
+  color: #FFFFFF;
   transition: 200ms color;
   &.is-active {
-    color: rgba(255,255,255, 1);
+    color: #303133;
   }
 }
 
@@ -156,7 +152,7 @@ export default {
 .header {
   height: 60px;
   line-height: 60px;
-  background: #1d2033;
+  background: #FFFFFF;
   color: #fff;
   padding-left: 0;
 
@@ -177,7 +173,7 @@ export default {
   margin-right: 8px;
 
   &:hover {
-    background: rgba(255,255,255,0.1)
+    background: #FFFFFF
   }
 
   &.active i {
@@ -192,8 +188,8 @@ export default {
 .el-menu-item {
   position: relative;
   &.is-active {
-    background-color: #232639 !important;
-    color: #fff !important;
+    background-color: #5F82FF !important;
+    color: #FFFFFF !important;
     &::before {
       content: ' ';
       position: absolute;
@@ -201,7 +197,7 @@ export default {
       left: 0;
       top: 0;
       bottom: 0;
-      background: #52bcf0;
+      background: #5F82FF;
       // height: 100%;
     }
   }

@@ -1,6 +1,6 @@
 <template>
   <div class="tripleEditInfo">
-    <page-header title="三元组详细信息" />
+    <page-header style="background-color: #EBEEF5;" title="三元组详细信息" />
     <el-page-header @back="goBack" />
     <br>
     <br>
@@ -66,6 +66,7 @@
         :data="nodeTableData"
         highlight-current-row
         :border="true"
+		style="border-radius: 4px"
       >
      <el-table-column
        prop="name"

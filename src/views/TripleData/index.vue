@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if='!isEdit' class ='triplelist'>
-      <page-header title="三元组信息管理"/>
+      <page-header style="background-color: #EBEEF5;" title="三元组信息管理"/>
       <el-page-header v-if="isSearch" @back="goBack" />
       <el-container>
         <el-main>
@@ -14,7 +14,7 @@
                     </el-radio-group>
               </div>
             </el-col> 
-            <el-col :span="12" v-if="typeRadio == '0'" :offset="1">
+            <el-col :span="12" v-if="typeRadio == '0'" :offset="1" >
               <div class = 'radio-group'>
                 <el-radio-group v-model="secondRadio" fill="#5f82ff" size="big">
                       <el-radio-button label="0">全部信息</el-radio-button>
@@ -53,11 +53,11 @@
            <br/>
           <el-table
             v-loading="loading"
-            :header-cell-style="{background:'#D5D8DE'}"
+            :header-cell-style="{background:'#EBEEF5'}"
             :data="tripleTableData"
             @selection-change="handleSelect"
             highlight-current-row
-            :border="true"
+            :border="false"
           >
             <el-table-column
               type="selection"
@@ -101,18 +101,17 @@
             </el-table-column>
           </el-table>
         </el-main>
-        <el-footer>
-          <div style="text-align: right;">
+        <el-footer style="text-align: right;">
+          <div style="text-align: left;">
             <el-pagination
+              background
               layout="prev, pager, next"
               :total="total"
-              :current-page.sync="cur_page"
-            />
+              :current-page.sync="cur_page">
+            </el-pagination>
           </div>
               <el-button @click='isAdd = true'>添加</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
-              <el-button @click="deletetriples">
-                删除
-              </el-button>
+              <el-button @click="deletetriples">删除</el-button>
         </el-footer>
       </el-container>
       <el-dialog title="三元组信息" :visible.sync="isAdd ">
@@ -132,7 +131,8 @@
           <el-table
             :data="nodeTableData"
             highlight-current-row
-            :border="true"
+            :border="false"
+			style="border-radius: 4px"
           >
           <el-table-column
             prop="name"
@@ -495,7 +495,7 @@ export default {
     overflow: hidden;
   }
   .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
+    border-color: #5F82FF;
   }
   .avatar-uploader-icon {
     font-size: 28px;

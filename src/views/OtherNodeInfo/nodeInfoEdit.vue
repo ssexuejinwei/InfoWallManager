@@ -1,7 +1,6 @@
 <template>
   <div class="nodeInfoEditInfo">
-    <page-header title="修改其他节点" />
-    <el-page-header @back="goBack" />
+    <page-header style="background-color: #EBEEF5;" title="修改其他节点" />
     <!-- <el-divider direction="" /> -->
     <el-container>
         <el-main>
@@ -132,8 +131,12 @@
               <el-button  @click="addRelation" v-show="addRclick">确定</el-button>
             </el-col>
           </el-row>
+          </div>
           <el-row>
-            <el-col :span="2" :offset="20">
+            <el-col :span="8" :offset="20">
+              <el-button @click="goBack" style="background-color: #FFFFFF">
+                返回
+                </el-button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <el-button @click="save" style="background-color: #5f82ff" type="primary">
                 保存
               </el-button>
