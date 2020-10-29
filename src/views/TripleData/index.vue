@@ -68,7 +68,7 @@
               align="center"
             >
               <template slot-scope="scope">
-                {{scope.row.source_name}}
+                {{scope.row.from.name}}
               </template>
             </el-table-column>
             <el-table-column
@@ -76,11 +76,11 @@
               align="center"
             >
               <template slot-scope="scope">
-                <span>{{type[scope.row.source_type]}}</span>
+                <span>{{scope.row.from.isNews==true?type0[scope.row.from.type]:type1[scope.row.from.type]}}</span>
               </template>
             </el-table-column>
             <el-table-column
-              prop="label"
+              prop="relation"
               label="关系"
               align="center"
             />
@@ -89,7 +89,7 @@
               align="center"
             >
               <template slot-scope="scope">
-                {{scope.row.tail_name}}
+                {{scope.row.to.name}}
               </template>
             </el-table-column>
             <el-table-column
@@ -97,7 +97,7 @@
               align="center"
             >
               <template slot-scope="scope">
-                <span>{{type[scope.row.tail_type]}}</span>
+                <span>{{scope.row.to.isNews==true?type0[scope.row.to.type]:type1[scope.row.to.type]}}</span>
               </template>
             </el-table-column>
           </el-table>
@@ -112,106 +112,105 @@
             </el-pagination>
           </div>
               <el-button @click='isAdd = true'>添加</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
-              <el-button @click="deletetriples">删除</el-button>
+              <el-button @click="deletetriples" :disabled="this.selectedtriples.length==0">删除</el-button>
         </el-footer>
       </el-container>
       <el-dialog title="三元组信息" :visible.sync="isAdd ">
         <!-- 待添加节点 -->
         <el-dialog title="节点" :visible.sync="isChoose" append-to-body>
-					<div class = 'search'>
-					<el-input v-model="dialogSearch" @keyup.enter.native="handleDialogSearch" placeholder="请输入内容" style="width: 500px;text-align:center;">
-					    <el-button
-					      slot="append"
-					      icon="el-icon-search"
-					      class="search"
-					      @click="handleDialogSearch"
-					    />
-					  </el-input>
-					</div>
-          <br/>
-          <el-table
-            :data="nodeTableData"
-            highlight-current-row
-            :border="false"
-			style="border-radius: 4px"
-          >
-          <el-table-column
-            prop="name"
-            label="节点名"
-            align="center"
-          />
-          <el-table-column
-            label="是否热点"
-            align="center"
-          >
-            <template slot-scope="scope">
-              <span v-if="scope.row.is_hot=='false'">否</span>
-              <span v-if="scope.row.is_hot=='true'">是</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="importance"
-            label="重要等级"
-            align="center"
-          />
-         <el-table-column
-            label="操作"
-            align="center"
-          >
-            <template slot-scope="scope">
-              <el-button
-                size="medium"
-                :disabled="nodeTableData[scope.$index].disable"
-                @click="handleChoose(scope.$index,scope.row)"
-              >
-                选择
-              </el-button>
-            </template>
-          </el-table-column> -->
-          </el-table>
-          <div style="text-align: right;">
-            <el-pagination
-              layout="prev, pager, next"
-              :total="total_add"
-              :current-page.sync="cur_page_add"
-            />
-          </div>
+					<div class="filter">
+					    <el-row>
+					      <el-radio-group v-model="ishotRadio" fill="#5f82ff" size="small">
+					        <el-radio-button label="0">热点新闻节点</el-radio-button>
+					        <el-radio-button label="1">其他新闻节点</el-radio-button>
+					      </el-radio-group>
+					    </el-row>
+					    <br>
+					    <el-row v-if="ishotRadio == 1">
+					      <el-radio-group v-model="notHotRadio" fill="#5f82ff">
+					          <el-radio label="1">人</el-radio>
+					          <el-radio label="2">物</el-radio>
+					          <el-radio label="3">地点</el-radio>
+					          <el-radio label="4">其他</el-radio>
+					        </el-radio-group>
+					    </el-row>
+					    <el-row v-if="ishotRadio == 0">
+					      <el-radio-group v-model="hotRadio" fill="#5f82ff">
+					          <el-radio label="1">通知公告</el-radio>
+					          <el-radio label="2">特色培养</el-radio>
+					          <el-radio label="3">招生信息</el-radio>
+					          <el-radio label="4">党建动态</el-radio>
+					          <el-radio label="5">校友专栏</el-radio>
+					        </el-radio-group>
+					    </el-row>
+					  </div>
+					  <br>
+					    <el-table
+					     :header-cell-style="{background:'#D5D8DE'}"
+					      v-loading="loading"
+					      :data="nodeInfoTableData"
+					      highlight-current-row
+					      :border="false"
+					style="border-radius: 4px"
+					    >
+					      <el-table-column
+					        prop="name"
+					        label="节点名称"
+					        align="center"
+					      />
+					      <el-table-column
+					        label="节点类型"
+					        align="center"
+					      >
+					        <template slot-scope="scope">
+					          <span>{{ishotRadio==0?type0[scope.row.type]:type1[scope.row.type]}}</span>
+					        </template>
+					      </el-table-column>
+					      <el-table-column
+					        label="操作"
+					        align="center"
+					      >
+					        <template slot-scope="scope">
+					          <el-button
+					            type="primary"
+					            style="background-color: #5F82FF;"
+					            size="medium"
+					            :disabled="nodeInfoTableData[scope.$index].disable"
+					            @click="handleChoose(scope.$index,scope.row)"
+					          >
+					            选择
+					          </el-button>
+					        </template>
+					      </el-table-column>
+					    </el-table>
+					    <div style="text-align: right;">
+					      <el-pagination
+					        layout="prev, pager, next"
+					        :total="total"
+					        :current-page.sync="cur_page_add"
+					      />
+					    </div>
           <span slot="footer" class="dialog-footer">
               <el-button @click="isChoose = false">取 消</el-button>
               <el-button type="primary" @click="isChoose=false">确 定</el-button>
           </span>
         </el-dialog>
         <el-form
-          :model="tripleForm"
-          label-width="100px"
-          style="width:31.25rem;"
+        :model="nodeRelationForm"
+        label-width="140px"
         >
-          <el-form-item
-            label="源节点"
-          >
-          <el-select v-model="tripleForm.source" placeholder="请选择">
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-          </el-select>
-          &nbsp;&nbsp;&nbsp;
-            <el-button type="primary" @click="isChoose=true">选择候选节点</el-button>
-          </el-form-item>
           <el-form-item
             label="关系"
           >
           <el-input
-            v-model="tripleForm.relation"
+            v-model="nodeRelationForm.relation"
             autocomplete="off"
           />
           </el-form-item>
           <el-form-item
-            label="尾节点"
+            label="源节点"
           >
-          <el-select v-model="tripleForm.target" placeholder="请选择">
+          <el-select v-model="nodeRelationForm.nodeFrom" placeholder="请选择">
               <el-option
                 v-for="item in options"
                 :key="item.value"
@@ -219,12 +218,22 @@
                 :value="item.value">
               </el-option>
           </el-select>
+					
+          &nbsp;&nbsp;&nbsp;
+            <el-button type="primary" @click="() =>{isChoose=true;getNodes()}" style="background-color: #5f82ff">选择候选节点</el-button>
           </el-form-item>
-          <!-- <el-form-item size="large">
-            <el-button @click="save" type="success">
-              保存
-            </el-button>
-          </el-form-item> -->
+					<el-form-item
+					  label="尾节点"
+					>
+					<el-select v-model="nodeRelationForm.nodeTo" placeholder="请选择">
+					    <el-option
+					      v-for="item in options"
+					      :key="item.value"
+					      :label="item.label"
+					      :value="item.value">
+					    </el-option>
+					</el-select>
+					</el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
             <el-button @click="isAdd = false">取 消</el-button>
@@ -249,7 +258,13 @@ export default {
   },
   data () {
     return {
-      type:['','通知公告','特色培养','招生信息','党建动态','校友专栏'],
+      nodeRelationForm:{},
+      ishotRadio:'0',
+      hotRadio:'1',
+      notHotRadio:'1',
+      nodeInfoTableData:[],
+      type0:['','通知公告','特色培养','招生信息','党建动态','校友专栏'],
+      type1:['','人','物','地点','其他'],
       secondRadio:"0",
       typeRadio:"0",
       loading:true,
@@ -259,10 +274,10 @@ export default {
       total_add:2,
       total:2,
       api:'/api/rel',
-      apiGetAll:'/api/rels',
-      apiNodes:'/api/nodes',
-      api_search_dialog:'/api/search',
-      api_search:'/api/rsearch',
+      apiGetAll:'/sys/data/getRelationList',
+      api_getNodes:'/sys/data/nodePageList',
+      api_add_relation:'/sys/data/addRelation',
+      api_del_node:'/sys/data/deleteRelationById',
       imageUrl:'',
       selectedtriples:[],
       triple:{},
@@ -279,39 +294,35 @@ export default {
     }
   },
   watch: {
+    typeRadio(newValue,oladValue) {
+        this.getData()
+    },
+    secondRadio(newValue,oladValue) {
+        this.getData()
+    },
     search(newValue,oladValue) {
       if(newValue == '') {
         this.isSearch = false
       }
     },
     cur_page(newValue,oldValue) {
-      if(this.isSearch) {
-        this.getSearchData()()
-      } else {
-        this.getData()
-      }
+      this.getData()
     },
     cur_page_add(newValue,oldValue) {
-      if(this.isDialogSearch) {
-        this.getDialogSearchData()
-      } else {
-        this.getNodes()
-      }
+      this.getNodes()
+    },
+    ishotRadio(newValue, oldValue) {
+      this.getNodes()
+    },
+    hotRadio(newValue, oldValue) {
+      this.getNodes()
+    },
+    notHotRadio(newValue, oldValue) {
+      this.getNodes()
     }
   },
   created () {
-    let array =['1','2','3','3','2']
-    array.forEach((value,index) => {
-      this.tripleTableData.push({
-        source_name:'www',
-        source_type:value,
-        tail_name:'fff',
-        tail_type:value,
-        label:'xxx'
-      })
-    })
-    this.loading = false
-   // this.getData()
+   this.getData()
    // this.getNodes()
   },
   methods: {
@@ -341,95 +352,59 @@ export default {
       } else {
         this.isSearch = true
         this.cur_page = 1
-        this.getSearchData()
-      }
-    },
-    getDialogSearchData () {
-      Axios.post(this.api_search_dialog+'?page='+this.cur_page_add+'&size=10',
-        {
-          keyword:this.dialogSearch,
-        }
-      ).then(response => {
-        this.nodeTableData  = []
-        this.total_add = response.data.count
-        response.data.results[0].data.forEach((value) => {
-          this.nodeTableData.push({
-            id: value.meta[0].id,
-            name:value.row[0].name,
-            ext:value.row[0].ext,
-            importance:value.row[0].importance,
-            is_hot:value.row[0].is_hot
-          })
-        })
-      }).catch(e => {
-        console.error(e)
-        this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
-        this.nodeInfoTableData = []
-      }).finally(() => { this.loading = false })
-    },
-    handleDialogSearch () {
-      if(this.dialogSearch == '') {
-        this.getNodes()
-      } else {
-        this.getDialogSearchData()
-        this.isDialogSearch = true
-        this.cur_page_add = 1
+        // this.getSearchData()
+        this.getData()
       }
     },
     handleChoose(index,row) {
       this.options.push({
-        value:this.nodeTableData[index].id,
-        label:this.nodeTableData[index].name
+        value:this.nodeInfoTableData[index].id,
+        label:this.nodeInfoTableData[index].name
       })
-      this.nodeTableData[index].disable = true
+      this.nodeInfoTableData[index].disable = true
+      this.$alert('选择成功')
     },
-    getNodes() {
-      Axios.get(this.apiNodes,{
-        params:{
-          size:10,
-          page:this.cur_page_add
+    getNodes () {
+      // console.log(this.$axios.default.baseURL+this.api)
+      let params = 
+        {
+          "size": 10,
+          "current": this.cur_page_add,
+          "search": "",
+          "isNews": this.ishotRadio == '0'?true:false,
+          "type": this.ishotRadio == '0'?this.hotRadio:this.notHotRadio
         }
-      }).then(response => {
-        this.nodeTableData  = []
-        this.total_add = response.data.count
-        response.data.results[0].data.forEach((value) => {
-          this.nodeTableData.push({
-            id: value.meta[0].id,
-            name:value.row[0].name,
-            ext:value.row[0].ext,
-            importance:value.row[0].importance,
-            is_hot:value.row[0].is_hot
-          })
-        })
+      Axios.post(this.api_getNodes,params).then(res => {
+        // console.log(response)
+        let data = res.data.result
+        this.total = data.total
+        this.nodeInfoTableData = data.records
       }).catch(e => {
-        console.error(e)
-        this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
-        this.nodeInfoTableData = []
-      }).finally(() => { this.loading = false })
+          this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
+          this.nodeInfoTableData = []
+      }).finally(() => {this.loading = false})
     },
 		getData () {
-      Axios.get(this.apiGetAll,{
-        params:{
-          size:10,
-          page:this.cur_page
-        }
-      }).then(response => {
-        this.total = response.data.count
-        this.tripleTableData  = response.data.results[0].data
-      }).catch(e => {
-        console.error(e)
-        this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
-        this.nodeInfoTableData = []
-      }).finally(() => { this.loading = false })
+		  // console.log(this.$axios.default.baseURL+this.api)
+		  let params = 
+		    {
+		      "size": 10,
+		      "current": this.cur_page,
+		      "search": this.isSearch?this.search:'',
+		      "isNews": this.typeRadio == 0?true:false,
+		      "type": this.secondRadio==0?null:this.secondRadio
+		    }
+		  Axios.post(this.apiGetAll,params).then(res => {
+		    // console.log(response)
+		    let data = res.data.result
+		    // console.log(data)
+		    this.total = data.total
+		    this.tripleTableData = data.records
+		  }).catch(e => {
+		      this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
+		      this.nodeInfoTableData = []
+		  }).finally(() => {this.loading = false})
 		},
-    handleEditFinish (val) {
-      this.isEdit = false
-      // if (val) {
-      //   //获取新数据
-      //   this.getData()
-      //   this.isEdit = false
-      // }
-    },
     backHome (val) {
       this.isEdit = val
       // this.getData()
@@ -441,41 +416,44 @@ export default {
     },
     addtriple() {
       // console.log(this.tripleForm)
-      Axios.post(this.api, this.tripleForm)
-        .then((res) => {
-          if(res.data.errors.length!=0){
-            alert(res.data.errors.message).then(()=>{
-              this.$alert('添加失败')
-            })
-          } else {
-            this.$alert('添加成功', '成功').then(() => {
-              this.getData()
-              this.isAdd = false
-            })
-          }
-        }).catch(e => {
-          console.error(e)
-          this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
-        })
+      let params = []
+      params.push({
+        fromId:this.nodeRelationForm.nodeFrom,
+        toId:this.nodeRelationForm.nodeTo,
+        relation:this.nodeRelationForm.relation
+      })
+      Axios.post(this.api_add_relation,params).then(res2 => {
+        if(res2.data.errorCode ==="0") {
+          this.$alert('添加成功', '成功').then(() => {
+            this.isAdd = false
+            this.getData()
+          })
+        } else {
+          this.$alert(res2.data.errorMessage,'添加失败', )
+        }
+      })
     },
     deletetriple (triple) {
-      console.log('triple', triple)
-      const data = {
-        source: triple.source,
-        target:triple.target
-      }
-      return this.$axios.delete(this.api, {data:data})
+      const array = []
+      array.push(triple.id)
+      return this.$axios.post(this.api_del_node, array)
     },
     deletetriples () {
-      this.$confirm('是否删除选中的三元组', '提示', { type: 'warning' }).then(() => {
+      this.$confirm('是否删除选中的节点', '提示', { type: 'warning' }).then(() => {
         Promise.all(this.selectedtriples.map(this.deletetriple))
-          .then(() => this.$alert('删除成功', '成功', { type: 'success' }).then(()=>{
-            this.getData()
-          }), (e) => {
-            console.error(e)
-            this.$alert('删除失败', '错误', { type: 'error' })
+          .then((res) => {
+            if(res[0].data.errorCode == 0) {
+              this.$alert('删除成功', '成功', { type: 'success' }).then(()=>{
+                this.getData()
+              }), (e) => {
+                console.error(e)
+                this.$alert('删除失败', '错误', { type: 'error' })
+              }
+            } else{
+              this.$alert('删除失败', res.data.result)
+            } 
           })
-      })
+        })
     },
     handleSelect (val) {
       this.selectedtriples = val

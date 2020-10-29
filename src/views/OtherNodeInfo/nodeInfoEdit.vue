@@ -22,7 +22,7 @@
               label="热点新闻时间"
             >
               <el-date-picker
-                    v-model="nodeInfo.date"
+                    v-model="nodeInfo.time"
                     type="date"
                     placeholder="选择日期">
                   </el-date-picker>
@@ -43,7 +43,7 @@
               label="详细信息标题"
             >
             <el-input
-              v-model="nodeInfo.ext.title"
+              v-model="nodeInfo.title"
               autocomplete="off"
             />
             </el-form-item>
@@ -51,7 +51,7 @@
               label="详细信息提供者"
             >
             <el-input
-              v-model="nodeInfo.username"
+              v-model="nodeInfo.infoProvider"
               autocomplete="off"
             />
             </el-form-item>
@@ -63,7 +63,7 @@
 3. 不超过5张图片</span>
             <vue-editor id="editor"
                   useCustomImageHandler
-                  @image-added="handleImageAdded" v-model="nodeInfo.ext.content"
+                  @image-added="handleImageAdded" v-model="nodeInfo.infoContent"
                   >
                 </vue-editor>
             <!-- <vue-editor id="editor" useCustomImageHandler @imageAdded="handleImageAdded" :editor-toolbar="customToolbar" v-model="content"/> -->
@@ -91,7 +91,7 @@
         <el-footer>
           <div style="border-radius: 4px; background-color: #FFFFFF; padding: 20px;">
           <page-header title="添加其他节点关系" />
-          <el-form :model="relationList"  label-width="140px">
+          <el-form  label-width="140px">
             <div v-for="(relation,index) in relationList">
               <el-form-item :label="'关系'+String(index+1)" >
                 <el-input :value="relation" disabled>
@@ -244,35 +244,34 @@ export default {
       addRclick:false,
       relationList:[],
       ishotRadio:'0',
-      hotRadio:'0',
-      notHotRadio:'0',
+      hotRadio:'1',
+      notHotRadio:'1',
       cur_page:1,
       total:2,
       options:[],
-      type:['','通知公告','特色培养','招生信息','党建动态','校友专栏'],
-      nodeRelationForm:[],
+      type:['','人','物','地点','其他'],
+      nodeRelationForm:{},
       nodeInfoTableData:[],
       isChoose: false,
       typeOptions: [{
         value: '1',
-        label: '通知公告'
+        label: '人'
       }, {
         value: '2',
-        label: '特色培养'
+        label: '物'
       }, {
         value: '3',
-        label: '招生信息'
+        label: '地点'
       }, {
         value: '4',
-        label: '党建动态'
-      }, {
-        value: '5',
-        label: '校友专栏'
+        label: '其他'
       }],
-      api:'/api/node',
-      api_upload:'/api/photo/upload',
-      api_upload_get:'/api/photo/',
-      defaultnodeInfo:{},
+      api_getNodes:'/sys/data/nodePageList',
+      api:'/sys/data/addOrUpdateNode',
+      api_upload:'/sys/data/uploadFile',
+      api_upload_get:'/sys/data/uploadFile',
+      api_add_relation:'​/sys/data/addRelation',
+      api_get_rel:'/sys/data/getNodeRelationByNodeId',
       fileList:[],
       images:[],
       is_upload:false,
@@ -283,60 +282,101 @@ export default {
         [{ list: "ordered" }, { list: "bullet" }],
         ["image", "code-block"]
       ],
-      maxsize:10000
+      maxsize:10000,
+      loading:true
     }
   },
   watch: {
-   content(newValue, oldValue) {
-      // console.log(this.content.replace(/\"/g, "'"))
+    ishotRadio(newValue, oldValue) {
+      this.getNodes()
+    },
+    hotRadio(newValue, oldValue) {
+      this.getNodes()
+    },
+    notHotRadio(newValue, oldValue) {
+      this.getNodes()
+    },
+    cur_page(newValue, oldValue) {
+      this.getNodes()
     }
   },
   created () {
-    let array =['1','2','3','4','5']
-    array.forEach((value,index) => {
-      this.nodeInfoTableData.push({
-        id:index,
-        name:"textss",
-        date:"2020/10/1",
-        type:value,
+    this.fileNames = this.nodeInfo.images
+    this.fileNames.forEach((value,index) => {
+      this.fileList.push({
+        id: value,
+        url: value.indexOf('http')!=-1? value:this.$baseURL+value,
       })
     })
-    this.loading=false
-    
-		// if(typeof(this.nodeInfo.ext)=='string') {
-		// 	this.nodeInfo.ext = JSON.parse(this.nodeInfo.ext.replace(/'/g, '"'))
-		// }
-    
-  //   let Base64 = require('js-base64').Base64
-  //   this.nodeInfo.ext.content = Base64.decode(this.nodeInfo.ext.content)
-    
-  //   this.fileNames = this.nodeInfo.ext.img
-    
-  //   this.fileNames.forEach((value,index) => {
-  //     this.fileList.push({
-  //       id: value,
-  //       url: this.$baseURL+this.api_upload_get+value,
-  //     })
-  //   })
+    let Base64 = require('js-base64').Base64
+    this.nodeInfo.infoContent = Base64.decode(this.nodeInfo.infoContent)
+    this.getRels()
   },
   methods: {
+    getRels() {
+      Axios.get(this.api_get_rel,{
+        params:{ 
+          id: this.nodeInfo.id
+        }
+      }).then(res => {
+        let data = res.data.result
+        if( res.data.errorCode == 0){
+          data.forEach((rel) => {
+            this.relationList.push({
+              rel_id :rel.id,
+              relation:rel.relation,
+              id:rel.from.id
+            })
+          })
+        } else {
+          this.$alert(res2.data.errorMessage,'获取节点关系失败', )
+        }
+       
+      })
+    },
+    getNodes () {
+      // console.log(this.$axios.default.baseURL+this.api)
+      let params = 
+        {
+          "size": 10,
+          "current": this.cur_page,
+          "search": "",
+          "isNews": this.ishotRadio == '0'?true:false,
+          "type": this.ishotRadio == '0'?this.hotRadio:this.notHotRadio
+        }
+      Axios.post(this.api_getNodes,params).then(res => {
+        // console.log(response)
+        let data = res.data.result
+        this.total = data.total
+        this.nodeInfoTableData = data.records
+      }).catch(e => {
+          this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
+          this.nodeInfoTableData = []
+      }).finally(() => {this.loading = false})
+    },
     addRelation() {
       this.addRclick = false
-      this.relationList.push('关系:1111 节点:十大歌手')
+      
+      this.relationList.push({
+        relation:this.nodeRelationForm.relation,
+        id: this.nodeRelationForm.node,
+      })
     },
     handleChoose(index,row) {
       this.options.push({
-        value:this.nodeTableData[index].id,
-        label:this.nodeTableData[index].name
+        value:this.nodeInfoTableData[index].id,
+        label:this.nodeInfoTableData[index].name
       })
-      this.nodeTableData[index].disable = true
+      this.nodeInfoTableData[index].disable = true
+      this.$alert('选择成功')
     },
     handleImageAdded(file, Editor, cursorLocation, resetUploader) {
       // console.log('i am here')
       var formData = new FormData();
-      formData.append("photo", file);
+      formData.append("file", file);
       Axios.post(this.api_upload,formData).then(res =>{
-        let url = this.$baseURL + this.api_upload_get +res.data.results; // Get url from response
+        // console.log(this.$baseURL + res.data.result.url)
+        let url = this.$baseURL + res.data.result.url; // Get url from response
         Editor.insertEmbed(cursorLocation, "image", url);
         resetUploader();
       }).catch(err => {
@@ -346,9 +386,9 @@ export default {
     handleChange(file, fileList) {
       this.is_upload = true
       let formData = new FormData()
-      formData.append('photo',file.raw)
+      formData.append('file',file.raw)
       Axios.post(this.api_upload,formData).then(res =>{
-        this.fileNames.push(res.data.results)
+        this.fileNames.push(res.data.result.url)
       })
     },
     handleRemove(file, fileList) {
@@ -363,60 +403,48 @@ export default {
     save () {
       // this.$emit('back', false)
       //调API
-      this.$emit('update', true)
       let Base64 = require('js-base64').Base64
-      this.nodeInfo.ext.img = this.fileNames
-      this.nodeInfo.ext.content = Base64.encode(this.nodeInfo.ext.content)
+      this.nodeInfo.images = this.fileNames
+      this.nodeInfo.infoContent = Base64.encode(this.nodeInfo.infoContent)
       // console.log(this.nodeInfo.ext.content.length)
-      if(this.nodeInfo.ext.content.length > this.maxsize) {
+      if(this.nodeInfo.infoContent.length > this.maxsize) {
         this.$alert('输入内容有误，请重新输入')
-        this.nodeInfo.ext.content = Base64.decode(this.nodeInfo.ext.content)
+        this.nodeInfo.infoContent = Base64.decode(this.nodeInfo.infoContent)
         return
       }
-      // console.log(this.nodeInfo.ext.content)
-      Axios.put(this.api,this.nodeInfo)
-        .then(() => {
-          this.$alert('保存成功', '成功').then(() => {
-            this.$emit('update', true)
-          })
+      Axios.post(this.api,this.nodeInfo)
+        .then((res) => {
+          if(res.data.errorCode ==="0") {
+            if(this.relationList.length != 0 ) {
+              let params = []
+              this.relationList.forEach((value) => {
+                params.push({
+                  fromId:this.nodeInfo.id,
+                  toId:value.id,
+                  relation:value.relation,
+                })
+              })
+              Axios.post(this.api_add_relation,params).then(res2 => {
+                if(res2.data.errorCode ==="0") {
+                  this.$alert('保存成功', '成功').then(() => {
+                    this.$emit('update', true)
+                  })
+                } else {
+                  this.$alert(res2.data.errorMessage,'保存失败', )
+                }
+              })
+            } else {
+              this.$alert('保存成功', '成功').then(() => {
+                this.$emit('update', true)
+              })
+            }
+          } else {
+            this.$alert(res.data.errorMessage,'保存失败', )
+          }
         }).catch(e => {
           this.error(e)
           this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
         })
-      // if(this.images.length === 0) {
-      //   Axios.put(this.api,this.nodeInfo)
-      //     .then(() => {
-      //       this.$alert('保存成功', '成功').then(() => {
-      //         this.$emit('update', true)
-      //       })
-      //     }).catch(e => {
-      //       this.error(e)
-      //       this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
-      //     })
-      // } else {
-      //   let reader =new FileReader();//创建读取文件的方法
-      //   // var img1=event.target.files[0];
-      //   let count = 0
-      //   reader.readAsDataURL(this.images[count].raw);//将文件已url的形式读入页面
-      //   let that=this;
-      //   reader.onload=function(e){ 
-      //     that.nodeInfo.ext.bin_img.push(e.target.result)
-      //     count ++
-      //     if (count < that.images.length) {
-      //       reader.readAsDataURL(that.images[count].raw)
-      //     } else {
-      //       Axios.put(that.api,that.nodeInfo)
-      //         .then(() => {
-      //           that.$alert('保存成功', '成功').then(() => {
-      //             that.$emit('update', true)
-      //           })
-      //         }).catch(e => {
-      //           that.error(e)
-      //           this.$alert(`错误原因: ${e.message || '未知错误'}`, '添加失败')
-      //         })
-      //     }
-      //   }
-      // }
     },
     goBack() {
       if(this.is_upload) {

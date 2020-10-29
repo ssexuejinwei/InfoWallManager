@@ -52,7 +52,7 @@
               align="center"
             />
             <el-table-column
-              prop="date"
+              prop="time"
               label="热点新闻时间"
               align="center"
             />
@@ -97,7 +97,7 @@
           </div>
               <el-button @click='addNode'>添加</el-button>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <el-button @click="deletenodeInfos">删除</el-button>
+              <el-button @click="deletenodeInfos" :disabled="selectednodeInfos.length===0">删除</el-button>
         </el-footer>
       </el-container>
       
@@ -132,8 +132,9 @@ export default {
       cur_page:1,
       total:12,
       api:'/api/node',
-      apiGetAll:'/api/nodes',
+      apiGetAll:'/sys/data/nodePageList',
       api_search:'/api/search',
+      api_del_node:'/sys/data/deleteNode',
       imageUrl:'',
       selectednodeInfos:[],
       nodeInfo:{},
@@ -157,25 +158,19 @@ export default {
       }
     },
     cur_page(newValue,oldValue) {
-      if(this.isSearch) {
-        this.getSearchData()
-      } else {
+      this.getData()
+    },
+    typeRadio(newValue, oldValue) {
+      this.getData()
+    },
+    displayType(newValue, oldValue) {
+      if(newValue == 0){
         this.getData()
       }
     }
   },
   created () {
-    // this.getData()
-    let array =['1','2','3','4','5']
-    array.forEach((value,index) => {
-      this.nodeInfoTableData.push({
-        id:index,
-        name:"textss",
-        date:"2020/10/1",
-        type:value,
-      })
-    })
-    this.loading=false
+    this.getData()
   },
   methods: {
     addNode(){
@@ -187,36 +182,14 @@ export default {
       this.cur_page = 1
       this.getData()
     },
-    getSearchData () {
-      Axios.post(this.api_search+'?page='+this.cur_page+'&size=10',
-        {
-          keyword:this.search,
-        }
-      ).then(response => {
-        this.nodeInfoTableData  = []
-        this.total = response.data.count
-        response.data.results[0].data.forEach((value) => {
-          this.nodeInfoTableData.push({
-            id: value.meta[0].id,
-            name:value.row[0].name,
-            ext:value.row[0].ext,
-            importance:value.row[0].importance,
-            is_hot:value.row[0].is_hot
-          })
-        })
-      }).catch(e => {
-        console.error(e)
-        this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
-        this.nodeInfoTableData = []
-      }).finally(() => { this.loading = false })
-    },
     handleSearch () {
       if(this.search == '') {
         this.getData()
       } else {
         this.isSearch = true
         this.cur_page = 1
-        this.getSearchData()
+        // this.getSearchData()
+        this.getData()
       }
     },
     handleChange(file, fileList) {
@@ -233,56 +206,43 @@ export default {
     },
 		getData () {
       // console.log(this.$axios.default.baseURL+this.api)
-      Axios.get(this.apiGetAll,{
-        params:{
-          size:10,
-          page:this.cur_page
+      let params = 
+        {
+          "size": 10,
+          "current": this.cur_page,
+          "search": this.isSearch?this.search:'',
+          "isNews": true,
+          "type": this.typeRadio==0?null:this.typeRadio
         }
-      }).then(response => {
-        this.nodeInfoTableData  = []
-        this.total = response.data.count
-        response.data.results[0].data.forEach((value) => {
-          this.nodeInfoTableData.push({
-            id: value.meta[0].id,
-            name:value.row[0].name,
-            ext:value.row[0].ext,
-            importance:value.row[0].importance,
-            is_hot:value.row[0].is_hot
-          })
-        })
+      Axios.post(this.apiGetAll,params).then(res => {
+        // console.log(response)
+        let data = res.data.result
+        // console.log(data)
+        this.total = data.total
+        this.nodeInfoTableData = data.records
+        this.displayType = 0
       }).catch(e => {
-        console.error(e)
-        this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
-        this.nodeInfoTableData = []
-      }).finally(() => { this.loading = false })
+          this.$message.error(`获取信息列表失败: ${e.message || '未知错误'}`)
+          this.nodeInfoTableData = []
+      }).finally(() => {this.loading = false})
 		},
     handleEditFinish (val) {
       // this.isEdit = false
       if (val) {
         //获取新数据
-        if(this.isSearch) {
-          this.getSearchData()
-        } else {
-          this.getData()
-        }
-        this.displayType = 0
+        this.getData()
+        // this.displayType = 0
       }
     },
     handleAddFinish (val) {
-      // this.isEdit = false
       if (val) {
         //获取新数据
-        if(this.isSearch) {
-          this.getSearchData()
-        } else {
-          this.getData()
-        }
-        this.displayType = 0
+        this.getData()
+        // this.displayType = 0
       }
     },
     backHome (val) {
       this.displayType = val
-      // this.getData()
     },
     handleEdit(index,row) {
       this.displayType = 1
@@ -302,21 +262,26 @@ export default {
         })
     },
     deletenodeInfo (nodeInfo) {
-      const data = {
-        id: nodeInfo.id
-      }
-      return this.$axios.delete(this.api, {data:data})
+      const array = []
+      array.push(nodeInfo.id)
+      return this.$axios.post(this.api_del_node, array)
     },
     deletenodeInfos () {
       this.$confirm('是否删除选中的节点', '提示', { type: 'warning' }).then(() => {
         Promise.all(this.selectednodeInfos.map(this.deletenodeInfo))
-          .then(() => this.$alert('删除成功', '成功', { type: 'success' }).then(()=>{
-            this.getData()
-          }), (e) => {
-            console.error(e)
-            this.$alert('删除失败', '错误', { type: 'error' })
+          .then((res) => {
+            if(res[0].data.errorCode == 0) {
+              this.$alert('删除成功', '成功', { type: 'success' }).then(()=>{
+                this.getData()
+              }), (e) => {
+                console.error(e)
+                this.$alert('删除失败', '错误', { type: 'error' })
+              }
+            } else{
+              this.$alert('删除失败', res.data.result)
+            } 
           })
-      })
+        })
     },
     handleSelect (val) {
       this.selectednodeInfos = val
