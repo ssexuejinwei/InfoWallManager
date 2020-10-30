@@ -93,11 +93,17 @@
           <page-header title="添加其他节点关系" />
           <el-form  label-width="140px">
             <div v-for="(relation,index) in relationList">
-              <el-form-item :label="'关系'+String(index+1)" >
-                <el-input :value="relation" disabled>
-                </el-input>
-              </el-form-item>
-            </div> 
+                <el-form-item :label="'关系'+String(index+1)" >
+                  <el-input :value="'关系：'+relation.relation + '  ' + '——尾节点ID：' + relation.id + '——尾节点name：' + relation.name" disabled>
+                      <el-button
+                        slot="prepend"
+                        icon="el-icon-close"
+                        style="background-color: #C4C4C4;"
+                        @click="handleDelRel(index)"
+                      />
+                  </el-input>
+                </el-form-item>
+              </div> 
           </el-form>
           <div class="realtion" v-if="addRclick">
             <el-form
@@ -115,7 +121,7 @@
               <el-form-item
                 label="尾节点"
               >
-              <el-select v-model="nodeRelationForm.tail" placeholder="请选择">
+              <el-select v-model="nodeRelationForm.target" placeholder="请选择">
                   <el-option
                     v-for="item in options"
                     :key="item.value"
@@ -163,59 +169,60 @@
           <br>
           <el-row v-if="ishotRadio == 1">
             <el-radio-group v-model="notHotRadio" fill="#5f82ff">
-                <el-radio label="0">人</el-radio>
-                <el-radio label="1">物</el-radio>
-                <el-radio label="2">地点</el-radio>
-                <el-radio label="3">其他</el-radio>
+                <el-radio label="1">人</el-radio>
+                <el-radio label="2">物</el-radio>
+                <el-radio label="3">地点</el-radio>
+                <el-radio label="4">其他</el-radio>
               </el-radio-group>
           </el-row>
           <el-row v-if="ishotRadio == 0">
             <el-radio-group v-model="hotRadio" fill="#5f82ff">
-                <el-radio label="0">通知公告</el-radio>
-                <el-radio label="1">特色培养</el-radio>
-                <el-radio label="2">招生信息</el-radio>
-                <el-radio label="3">党建动态</el-radio>
-                <el-radio label="4">校友专栏</el-radio>
+                <el-radio label="1">通知公告</el-radio>
+                <el-radio label="2">特色培养</el-radio>
+                <el-radio label="3">招生信息</el-radio>
+                <el-radio label="4">党建动态</el-radio>
+                <el-radio label="5">校友专栏</el-radio>
               </el-radio-group>
           </el-row>
         </div>
         <br>
           <el-table
-           :header-cell-style="{background:'#D5D8DE'}"
-            v-loading="loading"
-            :data="nodeInfoTableData"
-            highlight-current-row
-            :border="true"
-          >
-            <el-table-column
-              prop="name"
-              label="节点名称"
-              align="center"
-            />
-            <el-table-column
-              label="节点类型"
-              align="center"
-            >
-              <template slot-scope="scope">
-                <span>{{type[scope.row.type]}}</span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              label="操作"
-              align="center"
-            >
-              <template slot-scope="scope">
-                <el-button
-                  type="primary"
-                  style="background-color: #5F82FF;"
-                  size="medium"
-                  @click="handleChoose(scope.$index,scope.row)"
+               :header-cell-style="{background:'#D5D8DE'}"
+                :data="nodeInfoTableData"
+                highlight-current-row
+                :border="false"
+          style="border-radius: 4px"
+              >
+                <el-table-column
+                  prop="name"
+                  label="节点名称"
+                  align="center"
+                />
+                <el-table-column
+                  label="节点类型"
+                  align="center"
                 >
-                  选择
-                </el-button>
-              </template>
-            </el-table-column>
-          </el-table>
+                  <template slot-scope="scope">
+                    <span>{{ishotRadio==0?type0[scope.row.type]:type1[scope.row.type]}}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  label="操作"
+                  align="center"
+                >
+                  <template slot-scope="scope">
+                    <el-button
+                      type="primary"
+                      style="background-color: #5F82FF;"
+                      size="medium"
+                      :disabled="nodeInfoTableData[scope.$index].disable"
+                      @click="handleChoose(scope.$index,scope.row)"
+                    >
+                      选择
+                    </el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
           <div style="text-align: right;">
             <el-pagination
               layout="prev, pager, next"
@@ -250,6 +257,8 @@ export default {
       total:2,
       options:[],
       type:['','人','物','地点','其他'],
+      type0:['','通知公告','特色培养','招生信息','党建动态','校友专栏'],
+      type1:['','人','物','地点','其他'],
       nodeRelationForm:{},
       nodeInfoTableData:[],
       isChoose: false,
@@ -272,6 +281,7 @@ export default {
       api_upload_get:'/sys/data/uploadFile',
       api_add_relation:'​/sys/data/addRelation',
       api_get_rel:'/sys/data/getNodeRelationByNodeId',
+      api_del_rel:'/sys/data/deleteRelationById',
       fileList:[],
       images:[],
       is_upload:false,
@@ -313,6 +323,27 @@ export default {
     this.getRels()
   },
   methods: {
+    handleChoose(index,row) {
+      // console.log(this.nodeInfoTableData[index].id)
+      this.options.push({
+        value:this.nodeInfoTableData[index].id,
+        label:this.nodeInfoTableData[index].name
+      })
+      this.nodeInfoTableData[index].disable = true
+      this.$alert('选择成功')
+    },
+    handleDelRel (index) {
+      const array = []
+      array.push(this.relationList[index].rel_id)
+      this.$axios.post(this.api_del_rel, array).then(res =>{
+        if(res.data.errorCode == 0) {
+          this.$alert('删除成功')
+          this.relationList.splice(index, 1)
+        } else {
+          this.$alert('删除失败')
+        }
+      })
+    },
     getRels() {
       Axios.get(this.api_get_rel,{
         params:{ 
@@ -325,7 +356,8 @@ export default {
             this.relationList.push({
               rel_id :rel.id,
               relation:rel.relation,
-              id:rel.from.id
+              id:rel.target.id,
+              name:rel.target.name
             })
           })
         } else {
@@ -356,19 +388,30 @@ export default {
     },
     addRelation() {
       this.addRclick = false
-      
-      this.relationList.push({
+      let params = []
+      params.push({
+        source:this.nodeInfo.id,
+        target:this.nodeRelationForm.target,
         relation:this.nodeRelationForm.relation,
-        id: this.nodeRelationForm.node,
       })
-    },
-    handleChoose(index,row) {
-      this.options.push({
-        value:this.nodeInfoTableData[index].id,
-        label:this.nodeInfoTableData[index].name
+      Axios.post('/sys/data/addRelation',params).then(res2 => {
+        if(res2.data.errorCode ==="0") {
+          if(res2.data.result.length==0){
+            this.$alert('保存关系失败', '已存在该关系')
+          } else {
+            this.$alert('保存成功', '成功').then(() => {
+              this.relationList.push({
+                rel_id :res2.data.result[0].id,
+                relation:res2.data.result[0].relation,
+                id:res2.data.result[0].target.id,
+                name:res2.data.result[0].target.name
+              })
+            })
+          }
+        } else {
+          this.$alert(res2.data.errorMessage,'保存失败', )
+        }
       })
-      this.nodeInfoTableData[index].disable = true
-      this.$alert('选择成功')
     },
     handleImageAdded(file, Editor, cursorLocation, resetUploader) {
       // console.log('i am here')
@@ -412,32 +455,14 @@ export default {
         this.nodeInfo.infoContent = Base64.decode(this.nodeInfo.infoContent)
         return
       }
+      // console.log(this.nodeInfo)
+      // console.log(this.nodeInfo.ext.content)
       Axios.post(this.api,this.nodeInfo)
         .then((res) => {
           if(res.data.errorCode ==="0") {
-            if(this.relationList.length != 0 ) {
-              let params = []
-              this.relationList.forEach((value) => {
-                params.push({
-                  fromId:this.nodeInfo.id,
-                  toId:value.id,
-                  relation:value.relation,
-                })
-              })
-              Axios.post(this.api_add_relation,params).then(res2 => {
-                if(res2.data.errorCode ==="0") {
-                  this.$alert('保存成功', '成功').then(() => {
-                    this.$emit('update', true)
-                  })
-                } else {
-                  this.$alert(res2.data.errorMessage,'保存失败', )
-                }
-              })
-            } else {
-              this.$alert('保存成功', '成功').then(() => {
-                this.$emit('update', true)
-              })
-            }
+            this.$alert('保存成功', '成功').then(() => {
+              this.$emit('update', true)
+            })
           } else {
             this.$alert(res.data.errorMessage,'保存失败', )
           }

@@ -68,7 +68,7 @@
               align="center"
             >
               <template slot-scope="scope">
-                {{scope.row.from.name}}
+                {{scope.row.target.name}}
               </template>
             </el-table-column>
             <el-table-column
@@ -76,7 +76,7 @@
               align="center"
             >
               <template slot-scope="scope">
-                <span>{{scope.row.from.isNews==true?type0[scope.row.from.type]:type1[scope.row.from.type]}}</span>
+                <span>{{scope.row.target.isNews==true?type0[scope.row.target.type]:type1[scope.row.target.type]}}</span>
               </template>
             </el-table-column>
             <el-table-column
@@ -89,7 +89,7 @@
               align="center"
             >
               <template slot-scope="scope">
-                {{scope.row.to.name}}
+                {{scope.row.target.name}}
               </template>
             </el-table-column>
             <el-table-column
@@ -97,7 +97,7 @@
               align="center"
             >
               <template slot-scope="scope">
-                <span>{{scope.row.to.isNews==true?type0[scope.row.to.type]:type1[scope.row.to.type]}}</span>
+                <span>{{scope.row.target.isNews==true?type0[scope.row.target.type]:type1[scope.row.target.type]}}</span>
               </template>
             </el-table-column>
           </el-table>
@@ -418,8 +418,8 @@ export default {
       // console.log(this.tripleForm)
       let params = []
       params.push({
-        fromId:this.nodeRelationForm.nodeFrom,
-        toId:this.nodeRelationForm.nodeTo,
+        source:this.nodeRelationForm.nodeFrom,
+        target:this.nodeRelationForm.nodeTo,
         relation:this.nodeRelationForm.relation
       })
       Axios.post(this.api_add_relation,params).then(res2 => {
