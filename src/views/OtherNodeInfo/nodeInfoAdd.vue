@@ -5,6 +5,7 @@
     <el-container>
         <el-main>
           <el-form
+            :disabled = "isAddRelation"
             :model="nodeInfo"
 						label-position='left'
             label-width="140px"
@@ -63,6 +64,9 @@
 2. 不超过2000字
 3. 不超过5张图片</span>
             <vue-editor id="editor"
+						:editorOptions="editorSettings"
+                  class="ql-editor"
+                  :disabled = "isAddRelation"
                   useCustomImageHandler
                   @image-added="handleImageAdded" v-model="nodeInfo.infoContent"
                   >
@@ -76,6 +80,7 @@
             </el-form-item>
             <el-form-item label="上传图片">
               <el-upload
+              :disabled = "isAddRelation"
                 action="#"
                 ref="upload"
                 list-type="picture-card"
@@ -122,16 +127,10 @@
                   <el-form-item
                     label="尾节点"
                   >
-                  <el-select v-model="nodeRelationForm.node" placeholder="请选择">
-                      <el-option
-                        v-for="item in options"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                      </el-option>
-                  </el-select>
+                  <el-input v-model="nodeRelationForm.name">
                   &nbsp;&nbsp;&nbsp;
-                    <el-button type="primary" @click="() =>{isChoose=true;getNodes()}" style="background-color: #5f82ff">选择候选节点</el-button>
+                    <el-button slot='append' type="primary" @click="() =>{isChoose=true;getNodes()}" style="color:#ffffff;background-color: #5f82ff">选择候选节点</el-button>
+                  </el-input>
                   </el-form-item>
                 </el-form>
               </div>
@@ -170,6 +169,7 @@
               <br>
               <el-row v-if="ishotRadio == 1">
                 <el-radio-group v-model="notHotRadio" fill="#5f82ff">
+                    <el-radio label="0">全部信息</el-radio>
                     <el-radio label="1">人</el-radio>
                     <el-radio label="2">物</el-radio>
                     <el-radio label="3">地点</el-radio>
@@ -178,6 +178,7 @@
               </el-row>
               <el-row v-if="ishotRadio == 0">
                 <el-radio-group v-model="hotRadio" fill="#5f82ff">
+                    <el-radio label="0">全部信息</el-radio>
                     <el-radio label="1">通知公告</el-radio>
                     <el-radio label="2">特色培养</el-radio>
                     <el-radio label="3">招生信息</el-radio>
@@ -245,7 +246,7 @@
 import Axios from 'axios'
 import qs from 'qs'
 import VDistpicker from 'v-distpicker'
-import { VueEditor } from "vue2-editor"
+import {VueEditor} from "vue2-editor";
 export default {
   components: {
     VueEditor,
@@ -253,6 +254,12 @@ export default {
   },
   data () {
     return {
+			editorSettings: {
+				modules: {
+					imageDrop: true,
+					imageResize: {}
+				}
+			},
       firstClick:true,
       nodeid:'',
       addRclick:false,
@@ -302,7 +309,8 @@ export default {
         ["image", "code-block"]
       ],
       maxsize:10000,
-      loading:true
+      loading:true,
+      isAddRelation:false
     }
   },
   watch: {
@@ -317,7 +325,15 @@ export default {
     },
     notHotRadio(newValue, oldValue) {
       this.getNodes()
-    }
+    },
+    isChoose(newValue, oldValue) {
+      this.hotRadio = '0'
+      this.ishotRadio = '0'
+      this.notHotRadio = '0'
+    },
+    cur_page(newValue, oldValue) {
+      this.getNodes()
+    },
   },
   created () {
     this.nodeInfo = {
@@ -378,6 +394,9 @@ export default {
           "isNews": this.ishotRadio == '0'?true:false,
           "type": this.ishotRadio == '0'?this.hotRadio:this.notHotRadio
         }
+      if(params.type == 0) {
+        params.type = null
+      }
       Axios.post(this.api_getNodes,params).then(res => {
         // console.log(response)
         let data = res.data.result
@@ -393,7 +412,7 @@ export default {
       let params = []
       params.push({
         source:this.nodeInfo.id,
-        target:this.nodeRelationForm.node,
+        target:this.nodeRelationForm.id,
         relation:this.nodeRelationForm.relation,
       })
       Axios.post('/sys/data/addRelation',params).then(res2 => {
@@ -408,6 +427,7 @@ export default {
                 id:res2.data.result[0].target.id,
                 name:res2.data.result[0].target.name
               })
+              this.nodeRelationForm = {}
             })
           }
         } else {
@@ -418,12 +438,14 @@ export default {
     },
     handleChoose(index,row) {
       // console.log(this.nodeInfoTableData[index].id)
-      this.options.push({
-        value:this.nodeInfoTableData[index].id,
-        label:this.nodeInfoTableData[index].name
-      })
-      this.nodeInfoTableData[index].disable = true
-      this.$alert('选择成功')
+      this.nodeRelationForm = {
+        ...this.nodeRelationForm,
+        id:this.nodeInfoTableData[index].id,
+        name:this.nodeInfoTableData[index].name
+      }
+      this.isChoose = false
+      // this.nodeInfoTableData[index].disable = true
+      // this.$alert('选择成功')
     },
     handleImageAdded(file, Editor, cursorLocation, resetUploader) {
       var formData = new FormData();
@@ -475,6 +497,7 @@ export default {
               this.nodeInfo.infoContent = ori_content
               this.addRclick = true
               this.firstClick = false
+              this.isAddRelation = true
             } else{
               this.$alert(res.data.errorMessage,'获取新增节点ID失败')
             }
@@ -486,30 +509,36 @@ export default {
     save () {
       // this.$emit('back', false)
       //调API
-      let Base64 = require('js-base64').Base64
-      let ori_content = this.nodeInfo.infoContent
-      this.nodeInfo.images = this.fileNames
-      this.nodeInfo.infoContent = Base64.encode(this.nodeInfo.infoContent)
-      // console.log(this.nodeInfo.ext.content.length)
-      if(this.nodeInfo.infoContent.length > this.maxsize) {
-        this.$alert('输入内容有误，请重新输入')
-        this.nodeInfo.infoContent = Base64.decode(this.nodeInfo.infoContent)
-        return
-      }
-      // console.log(this.nodeInfo.ext.content)
-      this.nodeInfo.isNews = true
-      this.nodeInfo.id = null
-      Axios.post(this.api,this.nodeInfo)
-        .then((res) => {
-          if(res.data.errorCode == 0) {
-            this.nodeInfo.infoContent = ori_content
-            this.$alert('添加成功').then(()=>{
-              this.$emit('update',true)
-            })
-          } else{
-            this.$alert(res.data.errorMessage,'添加失败')
-          }
+      if(!this.isAddRelation) {
+        let Base64 = require('js-base64').Base64
+        let ori_content = this.nodeInfo.infoContent
+        this.nodeInfo.images = this.fileNames
+        this.nodeInfo.infoContent = Base64.encode(this.nodeInfo.infoContent)
+        // console.log(this.nodeInfo.ext.content.length)
+        if(this.nodeInfo.infoContent.length > this.maxsize) {
+          this.$alert('输入内容有误，请重新输入')
+          this.nodeInfo.infoContent = Base64.decode(this.nodeInfo.infoContent)
+          return
+        }
+        // console.log(this.nodeInfo.ext.content)
+        this.nodeInfo.isNews = false
+        this.nodeInfo.id = null
+        Axios.post(this.api,this.nodeInfo)
+          .then((res) => {
+            if(res.data.errorCode == 0) {
+              this.nodeInfo.infoContent = ori_content
+              this.$alert('添加成功').then(()=>{
+                this.$emit('update',true)
+              })
+            } else{
+              this.$alert(res.data.errorMessage,'添加失败')
+            }
+          })
+      } else {
+        this.$alert('添加成功').then(()=>{
+          this.$emit('update',true)
         })
+      }
     },
     goBack() {
       if(this.is_upload) {

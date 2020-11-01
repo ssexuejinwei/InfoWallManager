@@ -18,7 +18,7 @@
               <div class = 'radio-group'>
                 <el-radio-group v-model="secondRadio" fill="#5f82ff" size="big">
                       <el-radio-button label="0">全部信息</el-radio-button>
-                      <el-radio-button label="1">热点新闻</el-radio-button>
+                      <el-radio-button label="1">通知公告</el-radio-button>
                       <el-radio-button label="2">特色培养</el-radio-button>
                       <el-radio-button label="3">招生信息</el-radio-button>
                       <el-radio-button label="4">党建动态</el-radio-button>
@@ -68,7 +68,7 @@
               align="center"
             >
               <template slot-scope="scope">
-                {{scope.row.target.name}}
+                {{scope.row.source.name}}
               </template>
             </el-table-column>
             <el-table-column
@@ -76,7 +76,7 @@
               align="center"
             >
               <template slot-scope="scope">
-                <span>{{scope.row.target.isNews==true?type0[scope.row.target.type]:type1[scope.row.target.type]}}</span>
+                <span>{{scope.row.source.isNews==true?type0[scope.row.source.type]:type1[scope.row.source.type]}}</span>
               </template>
             </el-table-column>
             <el-table-column
@@ -128,6 +128,7 @@
 					    <br>
 					    <el-row v-if="ishotRadio == 1">
 					      <el-radio-group v-model="notHotRadio" fill="#5f82ff">
+                    <el-radio label="0">全部信息</el-radio>
 					          <el-radio label="1">人</el-radio>
 					          <el-radio label="2">物</el-radio>
 					          <el-radio label="3">地点</el-radio>
@@ -136,6 +137,7 @@
 					    </el-row>
 					    <el-row v-if="ishotRadio == 0">
 					      <el-radio-group v-model="hotRadio" fill="#5f82ff">
+                    <el-radio label="0">全部信息</el-radio>
 					          <el-radio label="1">通知公告</el-radio>
 					          <el-radio label="2">特色培养</el-radio>
 					          <el-radio label="3">招生信息</el-radio>
@@ -260,8 +262,8 @@ export default {
     return {
       nodeRelationForm:{},
       ishotRadio:'0',
-      hotRadio:'1',
-      notHotRadio:'1',
+      hotRadio:'0',
+      notHotRadio:'0',
       nodeInfoTableData:[],
       type0:['','通知公告','特色培养','招生信息','党建动态','校友专栏'],
       type1:['','人','物','地点','其他'],
@@ -295,6 +297,7 @@ export default {
   },
   watch: {
     typeRadio(newValue,oladValue) {
+        this.secondRadio = '0'
         this.getData()
     },
     secondRadio(newValue,oladValue) {
@@ -373,6 +376,9 @@ export default {
           "search": "",
           "isNews": this.ishotRadio == '0'?true:false,
           "type": this.ishotRadio == '0'?this.hotRadio:this.notHotRadio
+        }
+        if(params.type == 0) {
+          params.type = null
         }
       Axios.post(this.api_getNodes,params).then(res => {
         // console.log(response)

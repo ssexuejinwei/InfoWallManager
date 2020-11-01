@@ -25,8 +25,8 @@
             <!-- <i class="el-icon-location"></i> -->
             <span>详情信息管理</span>
           </template>
-          <el-menu-item index="hotnodeInfo">热点新闻节点</el-menu-item>
-          <el-menu-item index="othernodeInfo">其他节点</el-menu-item>
+          <el-menu-item index="/hotnodeInfo">热点新闻节点</el-menu-item>
+          <el-menu-item index="/othernodeInfo">其他节点</el-menu-item>
       </el-submenu>
       <el-menu-item index="/tripleData">
           <span>三元组管理</span>
@@ -87,13 +87,14 @@ export default {
 
   computed: {
     defaultActive () {
-      const path = this.$route.path
-      const matches = this.menus.filter(m => path.indexOf(m.path) === 0)
-      if (matches.length === 0) return ''
+      return  window.location.pathname;
+      // const path = this.$route.path
+      // const matches = this.menus.filter(m => path.indexOf(m.path) === 0)
+      // if (matches.length === 0) return ''
 
-      const match = _.maxBy(matches, o => o.path.length)
+      // const match = _.maxBy(matches, o => o.path.length)
 
-      return match.path
+      // return match.path
     },
 
     sideWidth () {

@@ -10,9 +10,14 @@ import './http/axios'
 import * as Sentry from '@sentry/browser'
 import * as Integrations from '@sentry/integrations'
 import VueCookies from 'vue-cookies'
-import Vue2Editor from "vue2-editor";
-Vue.use(Vue2Editor);
-Vue.use(VueCookies)
+import {VueEditor,Quill} from "vue2-editor";
+import ImageResize from "quill-image-resize-module";
+import { ImageDrop } from "quill-image-drop-module";
+Vue.use(VueEditor);
+// Vue.use(Quill);
+Quill.register("modules/imageDrop", ImageDrop);
+Quill.register("modules/imageResize", ImageResize);
+Vue.use(VueCookies);
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
     dsn: 'https://6dad3df829d84022ac4b9f791969fc52@sentry.io/1889540',

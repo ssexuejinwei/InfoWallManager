@@ -1,3 +1,4 @@
+let webpack = require('webpack');
 module.exports = {
   devServer: {
     // proxy: {
@@ -17,7 +18,13 @@ module.exports = {
   configureWebpack: {
     externals: {
       echarts: 'echarts'
-    }
+    },
+    plugins: [
+      new webpack.ProvidePlugin({
+        "window.Quill": "quill/dist/quill.js",
+        Quill: "quill/dist/quill.js"
+      })
+    ]
   },
   lintOnSave: 'error'
 }
