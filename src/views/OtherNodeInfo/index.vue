@@ -74,7 +74,7 @@
                   size="medium"
                   @click="handleEdit(scope.$index,scope.row)"
                 >
-                  修改
+                  查看
                 </el-button>
               </template>
             </el-table-column>

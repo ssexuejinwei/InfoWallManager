@@ -179,11 +179,11 @@
               <el-row v-if="ishotRadio == 0">
                 <el-radio-group v-model="hotRadio" fill="#5f82ff">
                     <el-radio label="0">全部信息</el-radio>
-                    <el-radio label="1">通知公告</el-radio>
-                    <el-radio label="2">特色培养</el-radio>
-                    <el-radio label="3">招生信息</el-radio>
-                    <el-radio label="4">党建动态</el-radio>
-                    <el-radio label="5">校友专栏</el-radio>
+                    <el-radio label="1">附中要闻</el-radio>
+                    <el-radio label="2">招生信息</el-radio>
+                    <el-radio label="3">党建动态</el-radio>
+                    <el-radio label="4">综合新闻</el-radio>
+                    <el-radio label="5">班团新闻</el-radio>
                   </el-radio-group>
               </el-row>
             </div>
@@ -270,7 +270,7 @@ export default {
       cur_page:1,
       total:2,
       options:[],
-      type0:['','通知公告','特色培养','招生信息','党建动态','校友专栏'],
+      type0:['','附中要闻','招生信息','党建动态','综合新闻','班团新闻'],
       type1:['','人','物','地点','其他'],
       type:['','人','物','地点','其他'],
       nodeRelationForm:{},

@@ -10,11 +10,11 @@
              <div class = 'radio-group'>
                <el-radio-group v-model="typeRadio" fill="#5f82ff">
                      <el-radio-button label="0">全部信息</el-radio-button>
-                     <el-radio-button label="1">通知公告</el-radio-button>
-                     <el-radio-button label="2">特色培养</el-radio-button>
-                     <el-radio-button label="3">招生信息</el-radio-button>
-                     <el-radio-button label="4">党建动态</el-radio-button>
-                     <el-radio-button label="5">校友专栏</el-radio-button>
+                     <el-radio-button label="1">附中要闻</el-radio-button>
+                     <el-radio-button label="2">招生信息</el-radio-button>
+                     <el-radio-button label="3">党建动态</el-radio-button>
+                     <el-radio-button label="4">综合新闻</el-radio-button>
+                     <el-radio-button label="5">班团新闻</el-radio-button>
                    </el-radio-group>
              </div>
            </el-col> 
@@ -80,7 +80,7 @@
                   size="medium"
                   @click="handleEdit(scope.$index,scope.row)"
                 >
-                  修改
+                  查看
                 </el-button>
               </template>
             </el-table-column>
@@ -125,7 +125,7 @@ export default {
   data () {
     return {
       displayType:0,//0首页，1 edit，2add，
-      type:['','通知公告','特色培养','招生信息','党建动态','校友专栏'],
+      type:['','附中要闻','招生信息','党建动态','综合新闻','班团新闻'],
       typeRadio:'0',
       isSearch:false,
       search:'',

@@ -6,7 +6,7 @@
       <el-container>
         <el-main>
           <el-row>
-            <el-col :span="4">
+            <el-col :span="5">
               <div class = 'radio-group'>
                 <el-radio-group v-model="typeRadio" fill="#5f82ff" size="big">
                       <el-radio-button label="0">热点新闻</el-radio-button>
@@ -14,15 +14,15 @@
                     </el-radio-group>
               </div>
             </el-col> 
-            <el-col :span="12" v-if="typeRadio == '0'" :offset="1" >
+            <el-col :span="12" v-if="typeRadio == '0'" >
               <div class = 'radio-group'>
                 <el-radio-group v-model="secondRadio" fill="#5f82ff" size="big">
                       <el-radio-button label="0">全部信息</el-radio-button>
-                      <el-radio-button label="1">通知公告</el-radio-button>
-                      <el-radio-button label="2">特色培养</el-radio-button>
-                      <el-radio-button label="3">招生信息</el-radio-button>
-                      <el-radio-button label="4">党建动态</el-radio-button>
-                      <el-radio-button label="5">校友专栏</el-radio-button>
+                      <el-radio-button label="1">附中要闻</el-radio-button>
+                      <el-radio-button label="2">招生信息</el-radio-button>
+                      <el-radio-button label="3">党建动态</el-radio-button>
+                      <el-radio-button label="4">综合新闻</el-radio-button>
+                      <el-radio-button label="5">班团新闻</el-radio-button>
                     </el-radio-group>
               </div>
             </el-col> 
@@ -37,7 +37,7 @@
                     </el-radio-group>
               </div>
             </el-col> 
-            <el-col :span="6" :offset="1">
+            <el-col :span="5" :offset="1">
                 <div class = 'search'>
                 <el-input v-model="search" @keyup.enter.native="handleSearch" placeholder="请输入内容" style="width: 300px;text-align:center;">
                     <el-button
@@ -138,11 +138,11 @@
 					    <el-row v-if="ishotRadio == 0">
 					      <el-radio-group v-model="hotRadio" fill="#5f82ff">
                     <el-radio label="0">全部信息</el-radio>
-					          <el-radio label="1">通知公告</el-radio>
-					          <el-radio label="2">特色培养</el-radio>
-					          <el-radio label="3">招生信息</el-radio>
-					          <el-radio label="4">党建动态</el-radio>
-					          <el-radio label="5">校友专栏</el-radio>
+					          <el-radio label="1">附中要闻</el-radio>
+					          <el-radio label="2">招生信息</el-radio>
+					          <el-radio label="3">党建动态</el-radio>
+					          <el-radio label="4">综合新闻</el-radio>
+					          <el-radio label="5">班团新闻</el-radio>
 					        </el-radio-group>
 					    </el-row>
 					  </div>
@@ -265,7 +265,7 @@ export default {
       hotRadio:'0',
       notHotRadio:'0',
       nodeInfoTableData:[],
-      type0:['','通知公告','特色培养','招生信息','党建动态','校友专栏'],
+      type0:['','附中要闻','招生信息','党建动态','综合新闻','班团新闻'],
       type1:['','人','物','地点','其他'],
       secondRadio:"0",
       typeRadio:"0",
@@ -369,6 +369,7 @@ export default {
     },
     getNodes () {
       // console.log(this.$axios.default.baseURL+this.api)
+      this.loading = true
       let params = 
         {
           "size": 10,
