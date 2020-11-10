@@ -15,6 +15,7 @@ module.exports = {
       errors: false
     },
   },
+  publicPath: './',
   configureWebpack: {
     externals: {
       echarts: 'echarts'
