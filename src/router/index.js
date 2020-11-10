@@ -33,7 +33,7 @@ const routes = [
       {
         path: '/',
         name: 'home',
-        component: () => import('@/views/Home')
+        component: () => import('@/views/HotNodeInfo/index')
       },
       {
         path: '/tripleData',

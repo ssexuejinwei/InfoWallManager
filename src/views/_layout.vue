@@ -87,6 +87,7 @@ export default {
 
   computed: {
     defaultActive () {
+      // return '/hotnodeInfo'
       return  window.location.pathname;
       // const path = this.$route.path
       // const matches = this.menus.filter(m => path.indexOf(m.path) === 0)

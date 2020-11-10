@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <router-view />
+    <!-- <router-link  to="/tripleData" ></router-link> -->
   </div>
 </template>
 
