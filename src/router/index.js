@@ -33,8 +33,8 @@ const routes = [
       {
         path: '',
         name: 'home',
-        component: () => import('@/views/HotNodeInfo/index'),
-        // component: () => import('@/views/Home')
+        // component: () => import('@/views/HotNodeInfo/index'),
+        component: () => import('@/views/Home')
       },
       {
         path: '/tripleData',
@@ -64,7 +64,7 @@ const routes = [
 ]
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   base: process.env.BASE_URL,
   routes
 })
