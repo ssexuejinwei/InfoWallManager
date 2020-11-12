@@ -170,6 +170,10 @@ export default {
     }
   },
   created () {
+    // console.log('pathsssss',window.location.pathname)
+    // if(window.location.pathname == '/') {
+      // window.location.pathname = '/hotnodeInfo'
+    // }
     this.getData()
   },
   methods: {

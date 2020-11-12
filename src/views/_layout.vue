@@ -81,14 +81,19 @@ export default {
     return {
       path:"/user",
       menus,
+      first:false,
       collapse: false
     }
   },
 
   computed: {
     defaultActive () {
-      // return '/hotnodeInfo'
       return  window.location.pathname;
+      // if(this.first) {
+        // return '/hotnodeInfo'
+      // } else {
+        // return  window.location.pathname;
+      // }
       // const path = this.$route.path
       // const matches = this.menus.filter(m => path.indexOf(m.path) === 0)
       // if (matches.length === 0) return ''
@@ -102,7 +107,9 @@ export default {
       return this.collapse ? '80px' : '200px'
     }
   },
-
+  created(){
+    this.first = true
+  },
   methods: {
     toggleCollapse () {
       this.collapse = !this.collapse

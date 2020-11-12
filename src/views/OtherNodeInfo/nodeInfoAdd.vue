@@ -100,7 +100,7 @@
               <el-form  label-width="140px">
               <div v-for="(relation,index) in relationList">
                   <el-form-item :label="'关系'+String(index+1)" >
-                    <el-input :value="'关系：'+relation.relation + '  ' + '——尾节点ID：' + relation.id + '——尾节点name：' + relation.name" disabled>
+                    <el-input :value="relation.s_name + '——'+ relation.relation + '——' + relation.t_name" disabled>
                         <el-button
                           slot="prepend"
                           icon="el-icon-close"
@@ -425,7 +425,8 @@ export default {
                 rel_id :res2.data.result[0].id,
                 relation:res2.data.result[0].relation,
                 id:res2.data.result[0].target.id,
-                name:res2.data.result[0].target.name
+                t_name:res2.data.result[0].target.name,
+                s_name:res2.data.result[0].source.name
               })
               this.nodeRelationForm = {}
             })
