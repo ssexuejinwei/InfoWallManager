@@ -13,6 +13,7 @@ import VueCookies from 'vue-cookies'
 import {VueEditor,Quill} from "vue2-editor";
 import ImageResize from "quill-image-resize-module";
 import { ImageDrop } from "quill-image-drop-module";
+import {prefixApiUrl} from "./constant";
 Vue.use(VueEditor);
 // Vue.use(Quill);
 Quill.register("modules/imageDrop", ImageDrop);
@@ -26,8 +27,10 @@ if (process.env.NODE_ENV === 'production') {
 }
 Vue.prototype.$cookies = VueCookies
 Vue.prototype.$axios = axios
-Vue.prototype.$baseURL = 'http://train.robizlab.com/infoWellApi/'
-axios.defaults.baseURL = 'http://train.robizlab.com/infoWellApi/'
+// Vue.prototype.$baseURL = 'http://train.robizlab.com/infoWellApi/'
+// axios.defaults.baseURL = 'http://train.robizlab.com/infoWellApi/'
+Vue.prototype.$baseURL = prefixApiUrl
+axios.defaults.baseURL = prefixApiUrl
 
 // axios.defaults.baseURL = ''
 // axios 拦截器
