@@ -31,7 +31,7 @@ const routes = [
     beforeEnter: ifAuthenticated,
     children: [
       {
-        path: '',
+        path: '/',
         name: 'home',
         // component: () => import('@/views/HotNodeInfo/index'),
         component: () => import('@/views/Home')

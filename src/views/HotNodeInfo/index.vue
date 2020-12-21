@@ -6,21 +6,23 @@
       <el-container>
         <el-main>
           <el-row>
-           <el-col :span="12">
+           <el-col :span="16">
              <div class = 'radio-group'>
                <el-radio-group v-model="typeRadio" fill="#5f82ff">
                      <el-radio-button label="0">全部信息</el-radio-button>
-                     <el-radio-button label="1">附中要闻</el-radio-button>
-                     <el-radio-button label="2">招生信息</el-radio-button>
-                     <el-radio-button label="3">党建动态</el-radio-button>
-                     <el-radio-button label="4">综合新闻</el-radio-button>
-                     <el-radio-button label="5">班团新闻</el-radio-button>
+                     <el-radio-button label="1">科创动态</el-radio-button>
+                     <el-radio-button label="2">文件通知</el-radio-button>
+                     <el-radio-button label="3">AI课堂</el-radio-button>
+                     <el-radio-button label="4">成长记录</el-radio-button>
+                     <el-radio-button label="5">社团空间</el-radio-button>
+                     <el-radio-button label="6">技术交流</el-radio-button>
+                     <el-radio-button label="7">lab建设</el-radio-button>
                    </el-radio-group>
              </div>
            </el-col> 
-           <el-col :span="12">
+           <el-col :span="8">
                <div class = 'search'>
-               <el-input v-model="search" @keyup.enter.native="handleSearch" placeholder="请输入内容" style="width: 500px;text-align:center;">
+               <el-input v-model="search" @keyup.enter.native="handleSearch" placeholder="请输入内容" style="width: 390px;text-align:center;">
                    <el-button
                      slot="append"
                      icon="el-icon-search"
@@ -125,7 +127,7 @@ export default {
   data () {
     return {
       displayType:0,//0首页，1 edit，2add，
-      type:['','附中要闻','招生信息','党建动态','综合新闻','班团新闻'],
+      type:['','科创动态','文件通知','AI课堂','成长记录','社团空间','技术交流','lab建设'],
       typeRadio:'0',
       isSearch:false,
       search:'',

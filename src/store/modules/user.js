@@ -3,11 +3,11 @@ import { Message } from 'element-ui'
 import qs from 'querystring'
 import cookies from 'vue-cookies'
 
-const statusKey = 'chunjiakey'
+const statusKey = 'infokey'
 
 const state = {
   username: '',
-  status: 201,
+  status: cookies.get(statusKey)||100,
   loading: false,
   error: null
 }
@@ -38,12 +38,12 @@ const mutations = {
 const actions = {
   login ({ commit }, { username, password }) {
     commit('DO_LOGIN')
-    return Axios.post('/api/user/manage/login/',qs.stringify({
-      username: username,
-      password: password
-    }),{headers:{'Content-Type':'application/x-www-form-urlencoded'}}).then(({ data }) => {
-      console.log(password =='admin@Chunjia')
-      const status  = data.status
+    return new Promise((resolve, reject)=>{resolve('200 OK');}).then(() => {
+	  // console.log('i am promise')
+    let status = 202
+	  if (username == 'ssfz' && password == 'ssfz123') {
+		  status = 201
+	  }
       cookies.set(statusKey,status)
       if(status ==202){
         Message.error(`用户名或者密码错误`)

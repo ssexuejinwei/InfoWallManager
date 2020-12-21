@@ -177,11 +177,13 @@
               <el-row v-if="ishotRadio == 0">
                 <el-radio-group v-model="hotRadio" fill="#5f82ff">
                     <el-radio label="0">全部信息</el-radio>
-                    <el-radio label="1">附中要闻</el-radio>
-                    <el-radio label="2">招生信息</el-radio>
-                    <el-radio label="3">党建动态</el-radio>
-                    <el-radio label="4">综合新闻</el-radio>
-                    <el-radio label="5">班团新闻</el-radio>
+                    <el-radio label="1">科创动态</el-radio>
+                    <el-radio label="2">文件通知</el-radio>
+                    <el-radio label="3">AI课堂</el-radio>
+                    <el-radio label="4">成长记录</el-radio>
+                    <el-radio label="5">社团空间</el-radio>
+                    <el-radio label="6">技术交流</el-radio>
+                    <el-radio label="7">lab建设</el-radio>
                   </el-radio-group>
               </el-row>
             </div>
@@ -270,8 +272,8 @@ export default {
       cur_page:1,
       total:2,
       options:[],
-      type:['','附中要闻','招生信息','党建动态','综合新闻','班团新闻'],
-      type0:['','附中要闻','招生信息','党建动态','综合新闻','班团新闻'],
+      type:['','科创动态','文件通知','AI课堂','成长记录','社团空间','技术交流','lab建设'],
+      type0:['','科创动态','文件通知','AI课堂','成长记录','社团空间','技术交流','lab建设'],
       type1:['','人','物','地点','其他'],
       nodeRelationForm:{},
       nodeInfoTableData:[],
@@ -279,19 +281,25 @@ export default {
       nodeInfo:{},
       typeOptions: [{
         value: '1',
-        label: '附中要闻'
+        label: '科创动态'
       }, {
         value: '2',
-        label: '招生信息'
+        label: '文件通知'
       }, {
         value: '3',
-        label: '党建动态'
+        label: 'AI课堂'
       }, {
         value: '4',
-        label: '综合新闻'
+        label: '成长记录'
       }, {
         value: '5',
-        label: '班团新闻'
+        label: '社团空间'
+      },{
+        value: '6',
+        label: '技术交流'
+      },{
+        value: '7',
+        label: 'lab建设'
       }],
       api_getNodes:'/sys/data/nodePageList',
       api:'/sys/data/addOrUpdateNode',

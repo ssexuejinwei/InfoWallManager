@@ -48,7 +48,11 @@
         >
           信息墙数据管理后台
         </div>
-
+        <div class="right">
+          <el-button type="text" @click="logout">
+            登出
+          </el-button>
+        </div>
       </el-header>
       <el-main>
         <router-view />
