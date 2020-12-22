@@ -1,4 +1,4 @@
-# nike-manager-vue
+# infowall-manager-vue
 
 ## Project setup
 ```
